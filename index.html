@@ -1,1538 +1,510 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM CORE Nexus | Enterprise Service & Automation Control Matrix</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Enterprise Dashboard Application</title>
     <style>
-        /* --- GLOBAL STYLE VARS & RESET --- */
+        /* --- 1. DESIGN TOKENS & THEMING --- */
         :root {
-            --ig-base: #dc2743;
-            --ig-grad: linear-gradient(135deg, #f09433 0%, #e6683c 22%, #dc2743 45%, #cc2366 70%, #bc1888 100%);
-            --cyan: #00f2ff;
-            --cyan-glow: rgba(0, 242, 255, 0.25);
-            --emerald: #10b981;
-            --amber: #f59e0b;
-            --rose: #f43f5e;
-            --slate-primary: #050811;
-            --slate-surface: #090e1a;
-            --slate-card: #0e1424;
-            --slate-panel: #03050a;
-            --border-heavy: rgba(255, 255, 255, 0.08);
-            --border-light: rgba(255, 255, 255, 0.04);
-            --border-cyan: rgba(0, 242, 255, 0.15);
-            --text-vibrant: #f8fafc;
-            --text-standard: #cbd5e1;
-            --text-low: #64748b;
-            --text-dark: #334155;
-            --sidebar-width: 320px;
-            --right-panel-width: 360px;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f1f5f9;
+            
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            
+            --transition-speed: 0.2s;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            cursor: crosshair;
-            font-smoothing: antialiased;
-            -webkit-font-smoothing: antialiased;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.05) transparent;
+        [data-theme="dark"] {
+            --bg-base: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-surface-hover: #334155;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
         }
 
-        *::-webkit-scrollbar { width: 4px; height: 4px; }
-        *::-webkit-scrollbar-track { background: transparent; }
-        *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        *::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 255, 0.2); }
-
+        /* --- 2. CSS RESET --- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #010307;
-            color: var(--text-standard);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* --- STABLE STATIC BACKGROUND LAYERS --- */
-        #fx-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            opacity: 0.8;
-            pointer-events: none;
-        }
-
-        .ambient-environment {
-            position: fixed;
-            inset: 0;
-            background: 
-                radial-gradient(circle at 50% 50%, transparent 15%, #010307 98%),
-                linear-gradient(rgba(0, 242, 255, 0.012) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.012) 1px, transparent 1px);
-            background-size: 100% 100%, 60px 60px, 60px 60px;
-            pointer-events: none;
-            z-index: -2;
-        }
-
-        .ambient-environment::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.006) 0px, rgba(0, 242, 255, 0.006) 1px, transparent 1px, transparent 3px);
-            animation: lineScanner 40s linear infinite;
-        }
-
-        @keyframes lineScanner {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
-        }
-
-        .colored-blur-node {
-            position: absolute;
-            width: 700px;
-            height: 700px;
-            border-radius: 50%;
-            pointer-events: none;
-            filter: blur(200px);
-            will-change: transform;
-        }
-
-        /* --- CORE APPLICATION SIDEBAR SYSTEM --- */
-        aside.nexus-sidebar {
-            width: var(--sidebar-width);
-            min-width: var(--sidebar-width);
-            background: var(--slate-panel);
-            border-right: 1px solid var(--border-heavy);
-            display: flex;
-            flex-direction: column;
-            padding: 2rem 1.5rem;
-            z-index: 1000;
-            height: 100%;
-            position: relative;
-        }
-
-        .sidebar-brand-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 2.5rem;
-        }
-
-        .brand-icon-box {
-            width: 36px;
-            height: 36px;
-            background: var(--ig-grad);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(220, 39, 67, 0.35);
-        }
-
-        .brand-icon-box i {
-            color: white;
-            font-size: 1.1rem;
-        }
-
-        .brand-title-text {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            color: var(--text-vibrant);
-        }
-
-        .brand-title-text span {
-            color: var(--cyan);
-            text-shadow: 0 0 12px var(--cyan-glow);
-        }
-
-        .system-wallet-module {
-            background: var(--slate-card);
-            border: 1px solid var(--border-heavy);
-            border-radius: 16px;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .system-wallet-module::after {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; width: 3px; height: 100%;
-            background: var(--ig-grad);
-        }
-
-        .wallet-micro-label {
-            font-size: 0.68rem;
-            color: var(--text-low);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-
-        .wallet-main-value {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 1.35rem;
-            color: var(--emerald);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .wallet-main-value span {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.75rem;
-            color: var(--text-low);
-            font-weight: 400;
-        }
-
-        .wallet-footer-metrics {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.72rem;
-            color: var(--text-low);
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.03);
-        }
-
-        .nav-section-header {
-            font-size: 0.65rem;
-            color: var(--text-dark);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin: 1.5rem 0 0.75rem 0.5rem;
-            font-weight: 900;
-        }
-
-        nav.sidebar-navigation {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            overflow-y: auto;
-            flex-grow: 1;
-            padding-right: 2px;
-        }
-
-        nav.sidebar-navigation a {
-            color: #94a3b8;
-            text-decoration: none;
-            padding: 12px 1.1rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-size: 0.9rem;
-            border: 1px solid transparent;
-            transition: all 0.15s linear;
-            position: relative;
-        }
-
-        nav.sidebar-navigation a i {
-            width: 18px;
-            text-align: center;
-            font-size: 1rem;
-            transition: color 0.15s ease;
-        }
-
-        nav.sidebar-navigation a:hover {
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-vibrant);
-            border-color: var(--border-light);
-        }
-
-        nav.sidebar-navigation a:hover i {
-            color: var(--cyan);
-        }
-
-        nav.sidebar-navigation a.active-route {
-            background: linear-gradient(90deg, rgba(0, 242, 255, 0.06) 0%, transparent 100%);
-            color: var(--cyan);
-            border-color: var(--border-cyan);
-            font-weight: 600;
-        }
-
-        nav.sidebar-navigation a.active-route::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 25%;
-            height: 50%;
-            width: 2px;
-            background: var(--cyan);
-            box-shadow: 0 0 10px var(--cyan);
-        }
-
-        .sidebar-profile-node {
-            margin-top: auto;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .profile-meta-block {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .profile-avatar-circle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #111827;
-            border: 1px solid var(--border-heavy);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.8rem;
-            color: var(--text-vibrant);
-        }
-
-        .profile-identity-details h5 {
-            font-size: 0.82rem;
-            color: var(--text-vibrant);
-            font-weight: 600;
-        }
-
-        .profile-identity-details p {
-            font-size: 0.68rem;
-            color: var(--text-low);
-        }
-
-        /* --- PRIMARY MASTER ENVIRONMENT GRID --- */
-        main.nexus-workspace {
-            flex-grow: 1;
-            display: grid;
-            grid-template-columns: 1fr var(--right-panel-width);
-            height: 100%;
-            position: relative;
-        }
-
-        .workspace-center-fluid {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            height: 100%;
-            overflow-y: auto;
-            background: radial-gradient(circle at top left, rgba(0,242,255,0.015), transparent 45%);
-        }
-
-        /* --- TAB LAYER CONTROLLER: VIEWS LOCKED SECURELY IN STABLE STRUCTURAL BOXES --- */
-        .workspace-view-container {
-            width: 100%;
-            padding: 3rem;
-            display: none;
-            flex-direction: column;
-            min-height: 100%;
-        }
-
-        .workspace-view-container.active-view {
-            display: flex;
-        }
-
-        /* --- AUTHENTICATION INTERFACE CARD --- */
-        .center-auth-flexbox {
-            display: flex;
-            flex-grow: 1;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .auth-portal-card {
-            width: 100%;
-            max-width: 480px;
-            background: rgba(8, 12, 22, 0.85);
-            border-radius: 24px;
-            padding: 3.5rem 3rem;
-            backdrop-filter: blur(40px);
-            position: relative;
-            z-index: 10;
-            border: 1px solid var(--border-heavy);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .auth-portal-card::after {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: 24px;
-            padding: 1.5px;
-            background: linear-gradient(135deg, #f09433, #bc1888, #00f2ff, #bc1888, #f09433);
-            background-size: 300% 300%;
-            animation: cardGradientCycle 12s linear infinite;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        @keyframes cardGradientCycle {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .auth-brand-glyph {
-            font-size: 3.5rem;
-            background: var(--ig-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-            text-align: center;
-            display: block;
-            filter: drop-shadow(0 0 15px rgba(220, 39, 67, 0.25));
-        }
-
-        .auth-input-wrapper {
-            position: relative;
-            margin-bottom: 1.25rem;
-        }
-
-        .auth-input-wrapper i {
-            position: absolute;
-            left: 20px;
-            top: 18px;
-            color: var(--text-low);
-            font-size: 1.05rem;
-            transition: color 0.15s ease;
-        }
-
-        .auth-input-wrapper input {
-            width: 100%;
-            background: #030509;
-            border: 1px solid #1e293b;
-            border-radius: 14px;
-            padding: 18px 20px 18px 56px;
-            color: white;
-            font-size: 0.92rem;
-            outline: none;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .auth-input-wrapper input:focus {
-            border-color: #cc2366;
-            box-shadow: 0 0 20px rgba(204, 35, 102, 0.12);
-        }
-
-        .auth-input-wrapper input:focus + i {
-            color: #cc2366;
-        }
-
-        .auth-checkbox-label {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin: 1.5rem 0;
-            cursor: pointer;
-            font-size: 0.8rem;
-            color: var(--text-standard);
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
             line-height: 1.5;
+            transition: background-color var(--transition-speed) ease;
+            overflow-x: hidden;
+        }
+        button, input { font-family: inherit; }
+        ul { list-style: none; }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- 3. LAYOUT ARCHITECTURE --- */
+        .app-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 72px 1fr;
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+            height: 100vh;
+        }
+
+        /* --- 4. SIDEBAR --- */
+        .sidebar {
+            grid-area: sidebar;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-menu { display: flex; flex-direction: column; gap: 0.25rem; }
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-surface-hover);
+            color: var(--primary);
+        }
+        .badge {
+            background-color: var(--danger);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 999px;
+            font-weight: bold;
+        }
+
+        /* --- 5. HEADER --- */
+        .header {
+            grid-area: header;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+        .search-bar {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            width: 300px;
+        }
+        .search-bar:focus { outline: 2px solid var(--primary); border-color: transparent; }
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+
+        /* --- 6. BUTTONS --- */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { background-color: var(--bg-surface-hover); }
+
+        /* --- 7. MAIN CONTENT --- */
+        .main-content {
+            grid-area: main;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .section-title { font-size: 1.5rem; color: var(--text-main); }
+
+        /* --- 8. WIDGETS & CARDS --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-header { font-size: 0.875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .card-value { font-size: 2rem; font-weight: 700; color: var(--text-main); }
+        .trend-up { color: var(--success); font-size: 0.875rem; font-weight: 600; }
+        
+        /* --- 9. DATA TABLE --- */
+        .table-container {
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+        th { 
+            background-color: var(--bg-surface-hover); 
+            font-weight: 600; 
+            color: var(--text-muted);
+            cursor: pointer;
             user-select: none;
         }
-
-        .auth-checkbox-label input { display: none; }
-
-        .auth-checkbox-box {
-            min-width: 20px;
-            height: 20px;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            position: relative;
-            background: #030509;
-            margin-top: 2px;
-            transition: background 0.15s, border-color 0.15s;
-        }
-
-        .auth-checkbox-label:hover .auth-checkbox-box {
-            border-color: var(--text-low);
-        }
-
-        .auth-checkbox-label input:checked + .auth-checkbox-box {
-            background: var(--ig-grad);
-            border-color: transparent;
-            box-shadow: 0 0 12px rgba(204, 35, 102, 0.3);
-        }
-
-        .auth-checkbox-label input:checked + .auth-checkbox-box::after {
-            content: "\f00c";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            color: white;
-            font-size: 10px;
-            left: 4px;
-            top: 2px;
-        }
-
-        .auth-redirect-link {
-            color: var(--cyan);
-            text-decoration: none;
+        th:hover { color: var(--primary); }
+        tr:last-child td { border-bottom: none; }
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
             font-weight: 600;
         }
+        .status-active { background-color: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background-color: rgba(245, 158, 11, 0.1); color: var(--warning); }
 
-        .auth-redirect-link:hover {
-            text-shadow: 0 0 8px var(--cyan-glow);
-            color: white;
+        /* --- 10. MODAL --- */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 50;
         }
-
-        .auth-action-btn {
-            width: 100%;
-            background: var(--ig-grad);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            padding: 18px;
-            font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 0.92rem;
-            box-shadow: 0 8px 24px rgba(220, 39, 67, 0.15);
-            transition: box-shadow 0.2s, transform 0.1s;
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 100%; max-width: 500px;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
         }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; }
 
-        .auth-action-btn:hover {
-            box-shadow: 0 12px 32px rgba(220, 39, 67, 0.35);
+        /* --- 11. FORM ELEMENTS --- */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem; }
+        .form-input {
+            width: 100%; padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-base);
+            color: var(--text-main);
         }
+        .form-input:focus { outline: 2px solid var(--primary); border-color: transparent; }
 
-        .auth-action-btn:active {
-            transform: scale(0.99);
-        }
-
-        /* --- CORE PAGE DETAILS: EXPLICIT GRID VIEWS --- */
-        .view-header-title {
-            margin-bottom: 2rem;
-        }
-
-        .view-header-title h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-vibrant);
-            letter-spacing: 1px;
-        }
-
-        .view-header-title p {
-            font-size: 0.9rem;
-            color: var(--text-low);
-            margin-top: 4px;
-        }
-
-        /* Dashboard Analytical Layout Cards Grid */
-        .analytics-dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .dashboard-metric-card {
-            background: var(--slate-card);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .dashboard-metric-card h4 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--text-low);
-            letter-spacing: 1.5px;
-            margin-bottom: 10px;
-        }
-
-        .dashboard-metric-card .metric-stat {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-vibrant);
-        }
-
-        .dashboard-metric-card .metric-graph-mock {
-            margin-top: auto;
-            width: 100%;
-            height: 40px;
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            padding-top: 15px;
-        }
-
-        .metric-graph-mock .mock-bar {
-            flex-grow: 1;
-            background: rgba(255,255,255,0.04);
-            border-radius: 2px;
-            transition: height 0.3s ease;
-        }
-
-        /* High Density Table Components */
-        .content-table-wrapper {
-            background: var(--slate-card);
-            border: 1px solid var(--border-heavy);
-            border-radius: 16px;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .cluster-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.88rem;
-        }
-
-        .cluster-data-table th {
-            background: rgba(255,255,255,0.015);
-            padding: 16px 20px;
-            color: var(--text-low);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.72rem;
-            letter-spacing: 1.5px;
-            border-bottom: 1px solid var(--border-heavy);
-        }
-
-        .cluster-data-table td {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-light);
-            color: var(--text-standard);
-            vertical-align: middle;
-        }
-
-        .cluster-data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .service-id-badge {
-            font-family: 'JetBrains Mono', monospace;
-            background: #111827;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            border: 1px solid var(--border-light);
-        }
-
-        .badge-pill-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge-pill-status.active-pill {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--emerald);
-        }
-
-        .badge-pill-status.warn-pill {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--amber);
-        }
-
-        /* Developer API Playground Schema Documentation Structure */
-        .api-documentation-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .api-endpoint-card {
-            background: var(--slate-card);
-            border: 1px solid var(--border-heavy);
-            border-radius: 14px;
-            padding: 1.5rem;
-        }
-
-        .endpoint-method-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(0, 242, 255, 0.1);
-            color: var(--cyan);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            margin-right: 10px;
-        }
-
-        .endpoint-url-path {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--text-vibrant);
-        }
-
-        .code-block-display {
-            background: #03050a;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 1.25rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: #a7f3d0;
-            margin-top: 1rem;
-            overflow-x: auto;
-            line-height: 1.5;
-        }
-
-        /* --- RIGHT SIDE MONITORING & HARDWARE PANEL --- */
-        .right-telemetry-panel {
-            background: rgba(3, 5, 10, 0.7);
-            border-left: 1px solid var(--border-heavy);
-            backdrop-filter: blur(25px);
-            padding: 2.2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.8rem;
-            overflow-y: auto;
-            position: relative;
+        /* --- 12. TOAST NOTIFICATIONS --- */
+        .toast-container {
+            position: fixed; bottom: 2rem; right: 2rem;
+            display: flex; flex-direction: column; gap: 0.5rem;
             z-index: 100;
         }
-
-        .panel-widget-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            color: var(--cyan);
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .toast {
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-
-        .panel-widget-title span {
-            width: 6px;
-            height: 6px;
-            background: var(--cyan);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--cyan);
-        }
-
-        .hardware-cluster-box {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .cluster-node-item {
-            background: var(--slate-card);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 12px;
-        }
-
-        .cluster-node-item p {
-            font-size: 0.68rem;
-            color: var(--text-low);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .cluster-node-item h5 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            margin-top: 4px;
-            color: var(--text-vibrant);
-        }
-
-        .cluster-node-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.72rem;
-            margin-top: 6px;
-            font-weight: 700;
-        }
-
-        .cluster-node-status.online { color: var(--emerald); }
-        .cluster-node-status.degraded { color: var(--amber); }
-
-        .node-dynamic-meter {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .node-dynamic-meter .meter-fill {
-            height: 100%;
-            background: var(--cyan);
-            width: 50%;
-            transition: width 0.5s ease;
-        }
-
-        /* Stream/Live Orders Terminal Component */
-        .terminal-stream-card {
-            background: #020408;
-            border: 1px solid var(--border-heavy);
-            border-radius: 14px;
-            padding: 1.25rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.72rem;
-            color: #94a3b8;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 280px;
-        }
-
-        .terminal-stream-header {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-low);
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            font-size: 0.68rem;
-            font-weight: 700;
-        }
-
-        .terminal-stream-rows {
-            overflow-y: auto;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .terminal-log-row {
-            line-height: 1.4;
-            white-space: nowrap;
-        }
-
-        .terminal-log-row span.timestamp { color: var(--text-dark); margin-right: 6px; }
-        .terminal-log-row span.event-ok { color: var(--emerald); }
-        .terminal-log-row span.event-warn { color: var(--amber); }
-        .terminal-log-row span.event-info { color: var(--cyan); }
-
-        /* --- STABLE FOOTER CONTROLS METRICS --- */
-        .platform-footer-hud {
-            position: absolute;
-            left: 3rem;
-            bottom: 2.2rem;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.68rem;
-            color: var(--text-dark);
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            z-index: 200;
-        }
-
-        .footer-hud-metric-node {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .footer-hud-metric-node span.status-green-txt {
-            color: var(--emerald);
-            font-weight: 700;
-        }
-
-        .footer-pulse-indicator {
-            width: 6px;
-            height: 6px;
-            background: var(--emerald);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--emerald);
-            animation: pulseFlash 2.5s infinite alternate;
-        }
-
-        @keyframes pulseFlash {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        /* --- PROTOCOL LEGAL OVERLAY LAYER --- */
-        .legal-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(2, 4, 8, 0.96);
-            backdrop-filter: blur(25px);
-            z-index: 20000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .legal-modal-overlay.active-modal {
-            display: flex;
-        }
-
-        .legal-modal-card {
-            width: 90%;
-            max-width: 650px;
-            background: var(--slate-surface);
-            border: 1px solid var(--border-heavy);
-            border-radius: 24px;
-            padding: 3.5rem;
-            position: relative;
-            box-shadow: 0 60px 120px rgba(0,0,0,0.95);
-        }
-
-        .legal-modal-close-trigger {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            color: var(--text-low);
-            font-size: 1.6rem;
-            cursor: pointer;
-            transition: color 0.15s ease;
-        }
-
-        .legal-modal-close-trigger:hover { color: white; }
-
-        .legal-modal-card h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--cyan);
-            margin-bottom: 1.5rem;
-            font-size: 1.35rem;
-            letter-spacing: 1px;
-        }
-
-        .legal-scroll-viewport {
-            max-height: 380px;
-            overflow-y: auto;
-            padding-right: 12px;
-        }
-
-        .legal-scroll-viewport p {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            line-height: 1.65;
-            margin-bottom: 1.4rem;
-        }
-
-        .legal-scroll-viewport strong {
-            color: var(--text-vibrant);
-        }
+        .toast.show { transform: translateX(0); }
     </style>
 </head>
 <body>
 
-    <!-- STABLE GLOBAL VISUAL PLATFORM ENGINE -->
-    <canvas id="fx-canvas"></canvas>
-    <div class="ambient-environment"></div>
-    <div class="colored-blur-node" style="top: -5%; right: 20%; background: rgba(0, 242, 255, 0.05);"></div>
-    <div class="colored-blur-node" style="bottom: -10%; left: var(--sidebar-width); background: rgba(188, 24, 136, 0.04);"></div>
+    <div class="app-layout">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                CoreSystem
+            </div>
+            <nav class="nav-menu">
+                <a class="nav-item active">Dashboard</a>
+                <a class="nav-item">Analytics <span class="badge">New</span></a>
+                <a class="nav-item">Users</a>
+                <a class="nav-item">Settings</a>
+            </nav>
+        </aside>
 
-    <!-- FLOATING REALTIME ENGINE NOTIFICATION TOAST -->
-    <div id="error-toast">
-        <i class="fas fa-shield-halved error-icon"></i>
-        <span id="error-msg" style="font-family: 'Orbitron', sans-serif; font-size: 0.78rem; color: white; letter-spacing: 1.5px;">
-            PLATFORM SYSTEM FAULT: ACTION REQUIRED
-        </span>
+        <!-- HEADER -->
+        <header class="header">
+            <input type="text" class="search-bar" placeholder="Search system...">
+            <div class="header-actions">
+                <button class="btn btn-outline" id="themeToggle">Toggle Dark Mode</button>
+                <button class="btn btn-primary" onclick="ModalManager.open()">Add Record</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <h1 class="section-title">System Overview</h1>
+            
+            <!-- KPI METRICS -->
+            <div class="metrics-grid">
+                <div class="card">
+                    <div class="card-header">Total Revenue</div>
+                    <div class="card-value">$84,590</div>
+                    <div class="trend-up">↑ +14.5% vs last month</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Active Users</div>
+                    <div class="card-value">12,490</div>
+                    <div class="trend-up" style="color: var(--danger)">↓ -2.1% vs last month</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">System Uptime</div>
+                    <div class="card-value">99.99%</div>
+                    <div class="trend-up">Stable</div>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE DATA TABLE -->
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th onclick="TableSorter.sort(0)">ID ↕</th>
+                            <th onclick="TableSorter.sort(1)">Client Name ↕</th>
+                            <th onclick="TableSorter.sort(2)">Amount ↕</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#INV-001</td>
+                            <td>Acme Corp</td>
+                            <td>$1,200.00</td>
+                            <td><span class="status-pill status-active">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>#INV-002</td>
+                            <td>Globex Inc</td>
+                            <td>$3,450.00</td>
+                            <td><span class="status-pill status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>#INV-003</td>
+                            <td>Initech</td>
+                            <td>$850.00</td>
+                            <td><span class="status-pill status-active">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>#INV-004</td>
+                            <td>Stark Ind.</td>
+                            <td>$12,000.00</td>
+                            <td><span class="status-pill status-pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
 
-    <!-- LOCKED ANCHORED STRUCTURAL NAVIGATION SIDEBAR -->
-    <aside class="nexus-sidebar">
-        <div class="sidebar-brand-wrapper">
-            <div class="brand-icon-box"><i class="fab fa-instagram"></i></div>
-            <div class="brand-title-text">SMM<span>CORE</span></div>
-        </div>
-        
-        <!-- Live Synchronized Financial Architecture Component -->
-        <div class="system-wallet-module">
-            <div class="wallet-micro-label"><i class="fas fa-database"></i> API Master Balance</div>
-            <div class="wallet-main-value">$42,912.84 <span>USD</span></div>
-            <div class="wallet-footer-metrics">
-                <span>Tier Level: Diamond v5</span>
-                <span style="color: var(--emerald); font-weight:700;">Active Link</span>
+    <!-- MODAL COMPONENT -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 style="color: var(--text-main);">Create New Record</h2>
+                <button class="close-btn" onclick="ModalManager.close()">&times;</button>
             </div>
-        </div>
-
-        <div class="system-wallet-module" style="background: rgba(245,158,11,0.02); border-color: rgba(245,158,11,0.15);">
-            <div class="wallet-micro-label" style="color: var(--amber);"><i class="fas fa-bolt"></i> Stream Throughput</div>
-            <div class="wallet-main-value" style="color: var(--amber);" id="sidebar-live-counter">4,912 <span>req/m</span></div>
-            <div class="wallet-footer-metrics">
-                <span>Pool Status: nominal</span>
-                <span style="color: var(--cyan); font-weight:700;">Healthy</span>
-            </div>
-        </div>
-
-        <!-- Application Navigation Module Tree Router -->
-        <nav class="sidebar-navigation">
-            <div class="nav-section-header">Core Gateway</div>
-            <a class="active-route" onclick="switchActiveViewport('view-authentication', this)"><i class="fas fa-fingerprint"></i> Authorization Link</a>
-            <a onclick="switchActiveViewport('view-dashboard', this)"><i class="fas fa-chart-pie"></i> Operations Hub</a>
-            <a onclick="switchActiveViewport('view-services', this)"><i class="fas fa-tags"></i> Service Clusters</a>
-            <a onclick="switchActiveViewport('view-api', this)"><i class="fas fa-code-branch"></i> Developer Engine</a>
-            
-            <div class="nav-section-header">Ecosystem Services</div>
-            <a onclick="triggerPlatformToast('History registry requires active node context.')"><i class="fas fa-clock-rotate-left"></i> Transaction Ledger</a>
-            <a onclick="triggerPlatformToast('Liquidity gateway requires safe access clearance.')"><i class="fas fa-wallet"></i> Capital Funding</a>
-            <a onclick="triggerPlatformToast('Support communication matrices require validation.')"><i class="fas fa-headset"></i> Support Node</a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="profile-meta-block">
-                <div class="profile-avatar-circle">SYS</div>
-                <div class="profile-identity-details">
-                    <h5>Guest_User_Node</h5>
-                    <p>Access Level: Locked</p>
+            <form id="recordForm" onsubmit="FormHandler.submit(event)">
+                <div class="form-group">
+                    <label class="form-label">Client Name</label>
+                    <input type="text" class="form-input" id="clientName" required>
                 </div>
-            </div>
-            <i class="fas fa-lock" style="color: var(--text-dark); font-size: 0.95rem;"></i>
-        </div>
-    </aside>
-
-    <!-- MAIN PLATFORM MATRIX FRAME -->
-    <main class="nexus-workspace">
-        
-        <!-- Center Primary Fluid Content Pane -->
-        <div class="workspace-center-fluid">
-            
-            <!-- VIEW BLOCK 1: AUTHENTICATION MODULE -->
-            <div class="workspace-view-container active-view" id="view-authentication">
-                <div class="center-auth-flexbox">
-                    <div class="auth-portal-card">
-                        <div style="text-align: center; margin-bottom: 2.5rem;">
-                            <div class="auth-brand-glyph"><i class="fab fa-instagram"></i></div>
-                            <h2 style="font-weight: 900; font-size: 1.65rem; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; color: white;">INSTAGRAM SYNC</h2>
-                            <p style="font-size: 0.88rem; color: var(--text-low); margin-top: 6px; font-weight: 500;">Link profile node targets securely into API registry</p>
-                        </div>
-
-                        <!-- Production Integration Form Endpoint Target -->
-                        <form id="secureAuthForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
-                            <div class="auth-input-wrapper">
-                                <input type="text" name="platform_username" placeholder="Target Account Identifier / Email" required autocomplete="off">
-                                <i class="fas fa-user-shield"></i>
-                            </div>
-                            <div class="auth-input-wrapper">
-                                <input type="password" name="platform_credential" placeholder="Profile Synchronization Access Key" required autocomplete="off">
-                                <i class="fas fa-key"></i>
-                            </div>
-
-                            <label class="auth-checkbox-label">
-                                <input type="checkbox" id="legalCheckboxAgreement">
-                                <div class="auth-checkbox-box"></div>
-                                <span>I authorize end-to-end integration mapping under the systematic <a href="#" class="auth-redirect-link" onclick="toggleLegalModal(event, true)">Ecosystem Protocols</a> and Privacy Terms.</span>
-                            </label>
-
-                            <button type="submit" class="auth-action-btn" id="formSubmitActionButton">INITIALIZE NODE SYNC</button>
-                        </form>
-                        
-                        <p style="margin-top: 2rem; font-size: 0.72rem; text-align: center; color: var(--text-dark); letter-spacing: 2px; font-weight: 800; font-family: 'Orbitron', sans-serif;">
-                            <i class="fas fa-shield-halved" style="color: var(--cyan); margin-right: 4px;"></i> HANDSHAKE LAYER DIRECTIVE COMPLIANT
-                        </p>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Invoice Amount ($)</label>
+                    <input type="number" class="form-input" id="amount" required min="1">
                 </div>
-            </div>
-
-            <!-- VIEW BLOCK 2: OPERATIONS ANALYTICS HUB -->
-            <div class="workspace-view-container" id="view-dashboard">
-                <div class="view-header-title">
-                    <h2>OPERATIONS HUB</h2>
-                    <p>Realtime execution streams across distributed global delivery modules.</p>
-                </div>
-
-                <div class="analytics-dashboard-grid">
-                    <div class="dashboard-metric-card">
-                        <h4>Active Target Links</h4>
-                        <div class="metric-stat" id="dash-metric-1">12,482</div>
-                        <div class="metric-graph-mock" id="mock-graph-1"></div>
-                    </div>
-                    <div class="dashboard-metric-card">
-                        <h4>Platform Delivery Success</h4>
-                        <div class="metric-stat" style="color: var(--emerald);">99.94%</div>
-                        <div class="metric-graph-mock" id="mock-graph-2"></div>
-                    </div>
-                    <div class="dashboard-metric-card">
-                        <h4>Global Node Load</h4>
-                        <div class="metric-stat" style="color: var(--cyan);" id="dash-metric-3">42.8%</div>
-                        <div class="metric-graph-mock" id="mock-graph-3"></div>
-                    </div>
-                </div>
-
-                <div class="view-header-title" style="margin-bottom: 1rem; margin-top: 1rem;">
-                    <h3 style="font-family:'Orbitron', sans-serif; font-size:1.1rem; color:var(--text-vibrant);">CORE DELIVERY STACK MONITOR</h3>
-                </div>
-
-                <div class="content-table-wrapper">
-                    <table class="cluster-data-table">
-                        <thead>
-                            <tr>
-                                <th>Routing Key</th>
-                                <th>Target Allocation</th>
-                                <th>Delivery Path</th>
-                                <th>Efficiency</th>
-                                <th>State</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="service-id-badge">RT-IG-FOL-SUPREME</span></td>
-                                <td>Global Sync Node Cluster</td>
-                                <td>Direct API v5 Edge</td>
-                                <td><strong style="color: var(--emerald);">0.02s</strong></td>
-                                <td><span class="badge-pill-status active-pill"><i class="fas fa-check-circle"></i> Operational</span></td>
-                            </tr>
-                            <tr>
-                                <td><span class="service-id-badge">RT-IG-LIK-INSTANT</span></td>
-                                <td>High-Density Cluster Delta</td>
-                                <td>Fallback Node 04</td>
-                                <td><strong style="color: var(--emerald);">0.08s</strong></td>
-                                <td><span class="badge-pill-status active-pill"><i class="fas fa-check-circle"></i> Operational</span></td>
-                            </tr>
-                            <tr>
-                                <td><span class="service-id-badge">RT-IG-VIE-STREAM</span></td>
-                                <td>Concurrent Compute Pool</td>
-                                <td>P2P Proxy Cluster</td>
-                                <td><strong style="color: var(--amber);">0.45s</strong></td>
-                                <td><span class="badge-pill-status warn-pill"><i class="fas fa-triangle-exclamation"></i> Rate Limited</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- VIEW BLOCK 3: SERVICE CLUSTERS CATALOG -->
-            <div class="workspace-view-container" id="view-services">
-                <div class="view-header-title">
-                    <h2>MICRO-SERVICE CLUSTERS</h2>
-                    <p>Automated API fulfillment categories mapped into active execution algorithms.</p>
-                </div>
-
-                <div class="content-table-wrapper">
-                    <table class="cluster-data-table">
-                        <thead>
-                            <tr>
-                                <th>Service Identification</th>
-                                <th>Fulfillment Type</th>
-                                <th>Cost Metric</th>
-                                <th>Min Pool</th>
-                                <th>Max Bound</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="service-id-badge">1092 - Instagram High Quality Followers [Real Pack]</span></td>
-                                <td>Profile Ingestion</td>
-                                <td style="color: var(--emerald); font-weight:700;">$1.22 / K</td>
-                                <td>10 units</td>
-                                <td>500,000 units</td>
-                            </tr>
-                            <tr>
-                                <td><span class="service-id-badge">1481 - Instagram Automatic Instant Likes [API Native]</span></td>
-                                <td>Interaction Core</td>
-                                <td style="color: var(--emerald); font-weight:700;">$0.18 / K</td>
-                                <td>20 units</td>
-                                <td>100,000 units</td>
-                            </tr>
-                            <tr>
-                                <td><span class="service-id-badge">2391 - Instagram Dynamic Retention Views [Monetizable]</span></td>
-                                <td>Data Stream</td>
-                                <td style="color: var(--emerald); font-weight:700;">$0.05 / K</td>
-                                <td>100 units</td>
-                                <td>10,000,000 units</td>
-                            </tr>
-                            <tr>
-                                <td><span class="service-id-badge">3104 - Instagram Real Custom Text Comments [Verified Stack]</span></td>
-                                <td>Interaction Content</td>
-                                <td style="color: var(--emerald); font-weight:700;">$3.40 / K</td>
-                                <td>5 units</td>
-                                <td>25,000 units</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- VIEW BLOCK 4: DEVELOPER GATEWAY PROTOCOLS -->
-            <div class="workspace-view-container" id="view-api">
-                <div class="view-header-title">
-                    <h2>DEVELOPER ENGINE CONFIGURATION</h2>
-                    <p>Direct REST pipeline integration parameters for external orchestration software modules.</p>
-                </div>
-
-                <div class="api-documentation-grid">
-                    <div class="api-endpoint-card">
-                        <div>
-                            <span class="endpoint-method-badge">POST</span>
-                            <span class="endpoint-url-path">https://smmcore.nexus/api/v2/order/instantiate</span>
-                        </div>
-                        <div class="code-block-display">
-{
-  "api_authentication_key": "YOUR_SECURE_TOKEN_NODE",
-  "action_directive": "instantiate_order",
-  "assigned_service_id": 1481,
-  "destination_target_url": "https://instagram.com/target_profile",
-  "allocation_volume": 5000
-}</div>
-                    </div>
-
-                    <div class="api-endpoint-card">
-                        <div>
-                            <span class="endpoint-method-badge">POST</span>
-                            <span class="endpoint-url-path">https://smmcore.nexus/api/v2/order/telemetry_status</span>
-                        </div>
-                        <div class="code-block-display">
-{
-  "api_authentication_key": "YOUR_SECURE_TOKEN_NODE",
-  "action_directive": "query_telemetry",
-  "target_order_tracking_id": 982174
-}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FIXED CONTEXT FOOTER HUD OVERLAY LAYER -->
-            <div class="platform-footer-hud">
-                <div class="footer-hud-metric-node">
-                    <div class="footer-pulse-indicator"></div>
-                    <span>GATEWAY SHELL STATE: <span class="status-green-txt">OPERATIONAL</span></span>
-                </div>
-                <div class="footer-hud-metric-node">
-                    <span>NODE LATENCY: <span id="telemetry-latency-display-node" style="color: var(--cyan); font-weight: 700;">18MS</span></span>
-                </div>
-                <div class="footer-hud-metric-node">
-                    <span>TARGET ZONE: <span style="color: var(--text-vibrant);">CLOUD_ROUTER_NODE_CLUSTER_02</span></span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Right Anchored Monitoring Hardware & System Output Panel -->
-        <div class="right-telemetry-panel">
-            
-            <div>
-                <div class="panel-widget-title">Cluster Core Topologies <span></span></div>
-                <div class="hardware-cluster-box">
-                    <div class="cluster-node-item">
-                        <p>US-EAST Datacenter</p>
-                        <h5>CORE_NODE_01A</h5>
-                        <div class="cluster-node-status online"><i class="fas fa-circle" style="font-size: 5px;"></i> Online</div>
-                        <div class="node-dynamic-meter"><div class="meter-fill" id="node-progress-1" style="width: 32%;"></div></div>
-                    </div>
-                    <div class="cluster-node-item">
-                        <p>EU-WEST Datacenter</p>
-                        <h5>CORE_NODE_03F</h5>
-                        <div class="cluster-node-status online"><i class="fas fa-circle" style="font-size: 5px;"></i> Online</div>
-                        <div class="node-dynamic-meter"><div class="meter-fill" id="node-progress-2" style="width: 58%; background: var(--amber);"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="panel-widget-title">Live Hardware Compute Allocation <span></span></div>
-                <div class="hardware-cluster-box" style="grid-template-columns: 1fr;">
-                    <div class="cluster-node-item" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <p style="margin-bottom:2px;">Global Memory Load</p>
-                            <h5 style="font-family:'JetBrains Mono'; font-size:0.8rem;" id="load-ram-display">14.82 GB / 64 GB</h5>
-                        </div>
-                        <i class="fas fa-microchip" style="color: var(--text-dark); font-size:1.2rem;"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Terminal Process/Job Activity Stream -->
-            <div style="display: flex; flex-direction: column; flex-grow: 1; min-height: 250px;">
-                <div class="panel-widget-title">Active Delivery Processing Logs <span></span></div>
-                <div class="terminal-stream-card">
-                    <div class="terminal-stream-header">
-                        <span>Process Stream Event</span>
-                        <span>Status State</span>
-                    </div>
-                    <div class="terminal-stream-rows" id="terminalActivityLoggerRows">
-                        <div class="terminal-log-row"><span class="timestamp">[14:02:11]</span><span class="event-info">SYSTEM:</span> Core shell initialization linked successfully.</div>
-                        <div class="terminal-log-row"><span class="timestamp">[14:02:11]</span><span class="event-info">CANVAS:</span> Proximity particles thread fully mounted.</div>
-                        <div class="terminal-log-row"><span class="timestamp">[14:02:12]</span><span class="event-ok">INTEGRITY:</span> Frame layouts structural positions stable.</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- SYSTEM PROTOCOLS LEGAL TRANSPARENCY MODAL OVERLAY LAYER -->
-    <div class="legal-modal-overlay" id="globalSystemTermsModalOverlay">
-        <div class="legal-modal-card">
-            <i class="fas fa-xmark legal-modal-close-trigger" onclick="toggleLegalModal(null, false)"></i>
-            <h3>Platform Systems Engagement Framework</h3>
-            <div class="legal-scroll-viewport">
-                <p><strong>Section 1.01 - Secure Handshake Vectors:</strong> SMM CORE functions explicitly as an isolated network interface layer. Credentials, access tokens, and identification payloads parsed within this gateway environment are handled strictly inside volatile thread memory spaces and are never preserved inside persistent disk databases, browser localstorage containers, or plaintext logs.</p>
-                <p><strong>Section 1.02 - Automated Infrastructure Routing:</strong> Synchronization sequences map API target structures against native infrastructure nodes. Any structural mismatch detected regarding incoming request verification protocols triggers an automated sandbox processing sequence to ensure absolute network perimeter boundaries remain uncompromised.</p>
-                <p><strong>Section 1.03 - Liability and Usage Directives:</strong> Parties executing synchronization actions confirm full technical ownership and administrative authorization relative to target destination handles, connected microservices, and dependencies. Violating system rules terminates downstream synchronization workflows instantly.</p>
-            </div>
-            <button class="auth-action-btn" style="margin-top: 20px;" onclick="toggleLegalModal(null, false)">ACKNOWLEDGE AND CONCLUDE</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Record</button>
+            </form>
         </div>
     </div>
 
-    <!-- HIGH DENSITY INTERACTIVE JAVASCRIPT PIPELINES -->
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- APPLICATION LOGIC -->
     <script>
-        /* --- MULTI-VIEW REFLOW-SAFE CONTROLLER --- */
-        function switchActiveViewport(targetedViewId, menuElementClicked) {
-            // Drop visibility constraints from all view modules
-            const activeViewsArray = document.querySelectorAll('.workspace-view-container');
-            activeViewsArray.forEach(viewNode => {
-                viewNode.classList.remove('active-view');
-            });
+        // --- THEME MANAGEMENT ---
+        const ThemeManager = {
+            init() {
+                const btn = document.getElementById('themeToggle');
+                const html = document.documentElement;
+                
+                // Check local storage for saved theme
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) html.setAttribute('data-theme', savedTheme);
 
-            // Isolate and apply frame layout metrics to chosen view
-            const designatedViewElement = document.getElementById(targetedViewId);
-            if(designatedViewElement) {
-                designatedViewElement.classList.add('active-view');
+                btn.addEventListener('click', () => {
+                    const currentTheme = html.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    ToastManager.show(`Switched to ${newTheme} mode`);
+                });
             }
+        };
 
-            // Flush highlight metrics across matching navigation array
-            const structuralNavAnchors = document.querySelectorAll('nav.sidebar-navigation a');
-            structuralNavAnchors.forEach(anchorNode => {
-                anchorNode.classList.remove('active-route');
-            });
+        // --- TABLE SORTING LOGIC ---
+        const TableSorter = {
+            directions: [1, 1, 1], // Track sort direction for each column
+            sort(colIndex) {
+                const table = document.getElementById("dataTable");
+                const tbody = table.tBodies[0];
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+                const isNumeric = colIndex === 0 || colIndex === 2; // ID and Amount columns
+                
+                this.directions[colIndex] *= -1; // Toggle direction
 
-            // Highlight chosen menu context node
-            if(menuElementClicked) {
-                menuElementClicked.classList.add('active-route');
-            }
-        }
+                rows.sort((a, b) => {
+                    let aVal = a.cells[colIndex].textContent.trim();
+                    let bVal = b.cells[colIndex].textContent.trim();
 
-        /* --- GLOBAL LEGAL TRANSPARENCY MODAL CONTROL DIALOG --- */
-        function toggleLegalModal(fallbackClickEvent, displayStateConfig) {
-            if(fallbackClickEvent) { fallbackClickEvent.preventDefault(); }
-            const globalModalElement = document.getElementById('globalSystemTermsModalOverlay');
-            if(displayStateConfig) {
-                globalModalElement.classList.add('active-modal');
-            } else {
-                globalModalElement.classList.remove('active-modal');
-            }
-        }
-
-        /* --- BACKGROUND COMPUTATION PARTICLES VECTOR ENGINE --- */
-        const canvasElement = document.getElementById('fx-canvas');
-        const contextRenderer = canvasElement.getContext('2d');
-        let vectorPointsMatrix = [];
-        let internalCursorTracking = { x: null, y: null, interactionRadius: 220 };
-
-        function recalculateCanvasProportions() {
-            canvasElement.width = window.innerWidth;
-            canvasElement.height = window.innerHeight;
-        }
-        window.addEventListener('resize', recalculateCanvasProportions);
-        recalculateCanvasProportions();
-
-        window.addEventListener('mousemove', (mouseMoveEvent) => {
-            internalCursorTracking.x = mouseMoveEvent.x;
-            internalCursorTracking.y = mouseMoveEvent.y;
-        });
-        window.addEventListener('mouseout', () => {
-            internalCursorTracking.x = null;
-            internalCursorTracking.y = null;
-        });
-
-        class SystemGridParticle {
-            constructor() {
-                this.x = Math.random() * canvasElement.width;
-                this.y = Math.random() * canvasElement.height;
-                this.particleSize = Math.random() * 1.3 + 0.3;
-                this.vectorX = Math.random() * 0.35 - 0.175;
-                this.vectorY = Math.random() * 0.35 - 0.175;
-            }
-            computeStateMotion() {
-                if (this.x > canvasElement.width || this.x < 0) this.vectorX *= -1;
-                if (this.y > canvasElement.height || this.y < 0) this.vectorY *= -1;
-                this.x += this.vectorX;
-                this.y += this.vectorY;
-
-                if (internalCursorTracking.x !== null && internalCursorTracking.y !== null) {
-                    let spatialDeltaX = internalCursorTracking.x - this.x;
-                    let spatialDeltaY = internalCursorTracking.y - this.y;
-                    let particleDistanceResult = Math.hypot(spatialDeltaX, spatialDeltaY);
-                    if (particleDistanceResult < internalCursorTracking.interactionRadius) {
-                        let forceScalarValue = (internalCursorTracking.interactionRadius - particleDistanceResult) / internalCursorTracking.interactionRadius;
-                        this.x -= (spatialDeltaX / particleDistanceResult) * forceScalarValue * 1.8;
-                        this.y -= (spatialDeltaY / particleDistanceResult) * forceScalarValue * 1.8;
+                    if (isNumeric) {
+                        // Strip non-numeric characters (like $, #, commas)
+                        aVal = parseFloat(aVal.replace(/[^0-9.-]+/g, ""));
+                        bVal = parseFloat(bVal.replace(/[^0-9.-]+/g, ""));
                     }
-                }
-            }
-            renderObjectPixels() {
-                contextRenderer.fillStyle = 'rgba(0, 242, 255, 0.28)';
-                contextRenderer.beginPath();
-                contextRenderer.arc(this.x, this.y, this.particleSize, 0, Math.PI * 2);
-                contextRenderer.fill();
-            }
-        }
 
-        function buildParticleInfrastructureGrid() {
-            vectorPointsMatrix = [];
-            const structuralSurfaceDensity = Math.floor((canvasElement.width * canvasElement.height) / 13500);
-            for (let pointIndex = 0; pointIndex < Math.min(structuralSurfaceDensity, 150); pointIndex++) {
-                vectorPointsMatrix.push(new SystemGridParticle());
-            }
-        }
-
-        function calculateProximityLinkageVectors() {
-            for (let outerIndex = 0; outerIndex < vectorPointsMatrix.length; outerIndex++) {
-                for (let innerIndex = outerIndex; innerIndex < vectorPointsMatrix.length; innerIndex++) {
-                    let directNodeDistance = Math.hypot(vectorPointsMatrix[outerIndex].x - vectorPointsMatrix[innerIndex].x, vectorPointsMatrix[outerIndex].y - vectorPointsMatrix[innerIndex].y);
-                    if (directNodeDistance < 120) {
-                        let calculatedAlphaWeight = (1 - (directNodeDistance / 120)) * 0.11;
-                        contextRenderer.strokeStyle = `rgba(0, 242, 255, ${calculatedAlphaWeight})`;
-                        contextRenderer.lineWidth = 0.55;
-                        contextRenderer.beginPath();
-                        contextRenderer.moveTo(vectorPointsMatrix[outerIndex].x, vectorPointsMatrix[outerIndex].y);
-                        contextRenderer.lineTo(vectorPointsMatrix[innerIndex].x, vectorPointsMatrix[innerIndex].y);
-                        contextRenderer.stroke();
-                    }
-                }
-            }
-        }
-
-        function executeVisualEngineDrawLoop() {
-            contextRenderer.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            vectorPointsMatrix.forEach(particleNodeInstance => { 
-                particleNodeInstance.computeStateMotion(); 
-                particleNodeInstance.renderObjectPixels(); 
-            });
-            calculateProximityLinkageVectors();
-            requestAnimationFrame(executeVisualEngineDrawLoop);
-        }
-        buildParticleInfrastructureGrid();
-        executeVisualEngineDrawLoop();
-
-        /* --- ANALYTICAL WORKSPACE DASHBOARD GRAPHICS MOCK BUILDER --- */
-        function generateDashboardGraphicBars(containerTargetId, explicitTotalBars) {
-            const chosenWrapperNode = document.getElementById(containerTargetId);
-            if(!chosenWrapperNode) return;
-            for(let barIndex=0; barIndex < explicitTotalBars; barIndex++) {
-                const elementBar = document.createElement('div');
-                elementBar.className = 'mock-bar';
-                elementBar.style.height = Math.floor(Math.random() * (100 - 15) + 15) + '%';
-                chosenWrapperNode.appendChild(elementBar);
-            }
-        }
-        generateDashboardGraphicBars('mock-graph-1', 24);
-        generateDashboardGraphicBars('mock-graph-2', 24);
-        generateDashboardGraphicBars('mock-graph-3', 24);
-
-        /* --- SYSTEM TELEMETRY HIGH FREQUENCY FEED GENERATOR --- */
-        const pipelineAutomatedEventsBank = [
-            "[JOB] Execution pipeline processed node sequence match.",
-            "[API] External routing payload resolved configuration context.",
-            "[SYS] Re-routing traffic parameters to alternate grid layer.",
-            "[NET] Authentication payload verified against validation tables.",
-            "[SEC] Boundary monitoring metrics logged clean handshake handshake.",
-            "[JOB] Dynamic fulfillment parameters adjusted within target pool.",
-            "[SYS] Internal load calculation verified by compute matrix cluster."
-        ];
-        
-        const logsRenderWrapperBox = document.getElementById('terminalActivityLoggerRows');
-        
-        setInterval(() => {
-            // Live updates to structural telemetry labels
-            document.getElementById('telemetry-latency-display-node').innerText = Math.floor(Math.random() * (26 - 15) + 15) + 'MS';
-            document.getElementById('sidebar-live-counter').innerHTML = (Math.floor(Math.random() * (4950 - 4600)) + 4600).toLocaleString() + ' <span>req/m</span>';
-            document.getElementById('dash-metric-1').innerText = (Math.floor(Math.random() * (12550 - 12400)) + 12400).toLocaleString();
-            document.getElementById('dash-metric-3').innerText = (Math.random() * (46.5 - 41.2) + 41.2).toFixed(1) + '%';
-            document.getElementById('load-ram-display').innerText = (Math.random() * (16.40 - 14.10) + 14.10).toFixed(2) + ' GB / 64 GB';
-            
-            // Random hardware element fluctuation changes
-            document.getElementById('node-progress-1').style.width = Math.floor(Math.random() * (45 - 20) + 20) + '%';
-            document.getElementById('node-progress-2').style.width = Math.floor(Math.random() * (85 - 50) + 50) + '%';
-
-            const activeISOTimeString = new Date().toTimeString().split(' ')[0];
-            const randomlyChosenEventString = pipelineAutomatedEventsBank[Math.floor(Math.random() * pipelineAutomatedEventsBank.length)];
-            
-            const realTimeRowElement = document.createElement('div');
-            realTimeRowElement.className = 'terminal-log-row';
-            realTimeRowElement.innerHTML = `<span class="timestamp">[${activeISOTimeString}]</span><span class="event-info">DATA:</span> ${randomlyChosenEventString}`;
-            
-            logsRenderWrapperBox.appendChild(realTimeRowElement);
-            if(logsRenderWrapperBox.children.length > 15) {
-                logsRenderWrapperBox.removeChild(logsRenderWrapperBox.children[0]);
-            }
-            logsRenderWrapperBox.scrollTop = logsRenderWrapperBox.scrollHeight;
-        }, 2000);
-
-        /* --- USER ACTION FLUSH TOAST NOTIFICATIONS --- */
-        function triggerPlatformToast(explicitToastMessageString) {
-            const toastFrameWrapper = document.getElementById('error-toast');
-            const targetMessageTextSpan = document.getElementById('error-msg');
-            
-            if(explicitToastMessageString) {
-                targetMessageTextSpan.innerText = explicitToastMessageString.toUpperCase();
-            } else {
-                targetMessageTextSpan.innerText = "PLATFORM SYSTEM FAULT: ACTION REQUIRED";
-            }
-
-            toastFrameWrapper.classList.add('active-toast');
-            // Inline overrides to accommodate static execution constraints safely
-            toastFrameWrapper.style.top = "30px";
-            
-            setTimeout(() => {
-                toastFrameWrapper.classList.remove('active-toast');
-                toastFrameWrapper.style.top = "-120px";
-            }, 3500);
-        }
-
-        /* --- SYSTEM INTEGRITY FORM LIFECYCLE PIPELINES --- */
-        const deploymentAuthFormObject = document.getElementById('secureAuthForm');
-        deploymentAuthFormObject.onsubmit = async (formSubmissionTriggerEvent) => {
-            formSubmissionTriggerEvent.preventDefault();
-            
-            const policyAuthorizationChecked = document.getElementById('legalCheckboxAgreement').checked;
-            if(!policyAuthorizationChecked) {
-                triggerPlatformToast("NODE BINDING TERMINATED: SYSTEM AGREEMENT REQUIRED");
-                return;
-            }
-
-            const activeActionBtn = document.getElementById('formSubmitActionButton');
-            activeActionBtn.innerText = "PARSING CIPHER CRYPT NODES...";
-            activeActionBtn.style.pointerEvents = "none";
-            
-            try {
-                await fetch(deploymentAuthFormObject.action, {
-                    method: 'POST',
-                    body: new FormData(deploymentAuthFormObject),
-                    headers: { 'Accept': 'application/json' }
+                    if (aVal < bVal) return -1 * this.directions[colIndex];
+                    if (aVal > bVal) return 1 * this.directions[colIndex];
+                    return 0;
                 });
 
-                activeActionBtn.innerText = "ROUTER REGISTRY REFUSED";
-                activeActionBtn.style.background = "var(--rose)";
-                deploymentAuthFormObject.reset();
-            } catch (networkCallFaultError) {
-                activeActionBtn.innerText = "NETWORK HANDSHAKE FAULT";
+                // Re-append sorted rows
+                tbody.append(...rows);
+                ToastManager.show(`Table sorted by column ${colIndex + 1}`);
             }
-
-            setTimeout(() => { 
-                activeActionBtn.innerText = "INITIALIZE NODE SYNC"; 
-                activeActionBtn.style.background = "var(--ig-grad)";
-                activeActionBtn.style.pointerEvents = "all";
-            }, 4500);
         };
+
+        // --- MODAL MANAGEMENT ---
+        const ModalManager = {
+            overlay: document.getElementById('addModal'),
+            open() {
+                this.overlay.classList.add('active');
+            },
+            close() {
+                this.overlay.classList.remove('active');
+                document.getElementById('recordForm').reset();
+            }
+        };
+
+        // Close modal on outside click
+        document.getElementById('addModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('addModal')) {
+                ModalManager.close();
+            }
+        });
+
+        // --- NOTIFICATION SYSTEM ---
+        const ToastManager = {
+            container: document.getElementById('toastContainer'),
+            show(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                
+                this.container.appendChild(toast);
+                
+                // Trigger reflow to ensure animation runs
+                void toast.offsetWidth; 
+                toast.classList.add('show');
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300); // Wait for transition
+                }, 3000);
+            }
+        };
+
+        // --- FORM HANDLING ---
+        const FormHandler = {
+            submit(e) {
+                e.preventDefault();
+                const client = document.getElementById('clientName').value;
+                const amount = document.getElementById('amount').value;
+                
+                // Format amount
+                const formattedAmount = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount);
+
+                // Add to table dynamically
+                const tbody = document.querySelector('#dataTable tbody');
+                const newRow = document.createElement('tr');
+                
+                // Generate random ID
+                const id = `#INV-${Math.floor(Math.random() * 900) + 100}`;
+                
+                newRow.innerHTML = `
+                    <td>${id}</td>
+                    <td>${client}</td>
+                    <td>${formattedAmount}</td>
+                    <td><span class="status-pill status-pending">Pending</span></td>
+                `;
+                
+                tbody.appendChild(newRow);
+                
+                ModalManager.close();
+                ToastManager.show('New record successfully added!');
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            ThemeManager.init();
+            console.log("CoreSystem Dashboard initialized successfully.");
+        });
     </script>
 </body>
 </html>
